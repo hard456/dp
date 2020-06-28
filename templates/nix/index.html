@@ -2,25 +2,33 @@
 
 {% block content %}
 
-    <div class="container">
+    <div class="container mt-4">
 
-    <div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
-    <span class="sr-only">Loading...</span>
-  </div>
-</div>
+        {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
+        {% endif %}
 
-{% if error_message %}
-    <div class="alert alert-danger">
-        {{ error_message }}
-    </div>
-  {% endif %}
+        <div class="jumbotron">
+            <h2 class="mb-3">Upload experiment</h2>
+            <span>Select a nix file to upload your experiment (.nix, .h5)</span>
+            <div class="pb-5">
+                <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+            <form id="uploadFileForm" action="/upload/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" class="form-control-file bg-secondary text-white border" name="myfile" accept=".nix,.h5">
+                <button id="experimentUploadButton" class="btn btn-primary float-right mt-3"
+                        onclick="submitUploadExperiment()">Upload
+                </button>
+            </form>
+                </div>
+        </div>
 
-    <form id="uploadFileForm" action="/upload/" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" class="form-control-file border" name="myfile" accept=".nix,.h5">
-    <button id="experimentUploadButton" class="btn btn-success float-right mt-2" onclick="submitUploadExperiment()">Upload</button>
-  </form>
 
     </div>
 

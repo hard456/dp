@@ -12,8 +12,38 @@ def index(request):
 
 
 def show_file(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
     return render(request, 'nix/file.html', {
-        'error_message': id
+        'experiment_id': id
+    })
+
+
+def show_json_ld(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/json-ld.html', {
+        'experiment_id': id
+    })
+
+
+def show_graph(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/graph.html', {
+        'experiment_id': id
+    })
+
+
+def show_sparql(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/sparql.html', {
+        'experiment_id': id
     })
 
 
@@ -33,7 +63,6 @@ def upload_experiment(request):
         # check unique experiment id
         while True:
             experiment_id = str(uuid.uuid1().int)
-            print(settings.MEDIA_URL + 'experiments/' + '34990128788807444172295489484962121020' + '/')
             if not fs.exists('experiments/' + experiment_id + '/'):
                 break
 

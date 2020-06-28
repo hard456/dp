@@ -1,12 +1,20 @@
 {% extends 'nix/default.html' %}
 
 {% block content %}
-file experiment
-    {% if error_message %}
-    <div class="alert alert-danger">
-        {{ error_message }}
+
+    <div class="container mt-4">
+
+        <div class="jumbotron">
+        <h2>Experiment</h2>
+        EXPERIMENT_ID : {{ experiment_id }}
+        <br><br>
+        The name of the experiment file is test.nix. You can download this file <b>here</b>.
+        </div>
+
     </div>
-{#        <a href="/media/experiments/{{ error_message }}/file/teest.nix" download>Download</a>#}
-  {% endif %}
+
+
+    {#        <a href="/media/experiments/{{ error_message }}/file/teest.nix" download>Download</a>#}
+
 {% endblock %}
 
