@@ -73,6 +73,15 @@ def upload_experiment(request):
     })
 
 
+def process_query(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/sparql.html', {
+        'experiment_id': id
+    })
+
+
 def testik(request):
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, '../media/experiments/test3.nix')

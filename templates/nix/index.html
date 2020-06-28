@@ -7,6 +7,9 @@
         {% if error_message %}
             <div class="alert alert-danger">
                 {{ error_message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
         {% endif %}
 
@@ -15,18 +18,21 @@
             <span>Select a nix file to upload your experiment (.nix, .h5)</span>
             <div class="pb-5">
                 <div class="d-flex justify-content-center">
-            <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
-                <span class="sr-only">Loading...</span>
-            </div>
-        </div>
-            <form id="uploadFileForm" action="/upload/" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" class="form-control-file bg-secondary text-white border" name="myfile" accept=".nix,.h5">
-                <button id="experimentUploadButton" class="btn btn-primary float-right mt-3"
-                        onclick="submitUploadExperiment()">Upload
-                </button>
-            </form>
+                    <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                        <span class="sr-only">Loading...</span>
+                    </div>
                 </div>
+                <div class="form-group">
+                    <form id="uploadExperimentForm" action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="file" class="form-control-file bg-secondary text-white border" name="myfile"
+                               accept=".nix,.h5">
+                        <button id="experimentUploadButton" class="btn btn-primary float-right mt-3"
+                                onclick="submitUploadExperiment()">Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
 
