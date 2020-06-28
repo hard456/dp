@@ -17,11 +17,34 @@
 
 <div class="container">
     <a href="{% url 'index' %}" class="no_underline">
-    <h1 class="mt-2 ml-2">Semantic Web Tool - NIX</h1>
-        </a>
+        <h1 class="mt-2">Semantic Web Tool - NIX</h1>
+    </a>
 </div>
 
-<hr class="mt-0 mb-4">
+<nav class="navbar navbar-expand-sm bg-light">
+        <div class="container">
+            <ul class="navbar-nav">
+            <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'index' %}">Home</a>
+                </li>
+                {% if experiment_id %}
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url 'experiment' id=experiment_id %}">Experiment</a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="{% url 'json-ld' id=experiment_id %}">JSON-LD</a>
+                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'sparql' id=experiment_id %}">SPARQL</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'graph' id=experiment_id %}">Graph</a>
+                </li>
+                {% endif %}
+
+            </ul>
+            </div>
+</nav>
 
 {% block content %}
 {% endblock %}
