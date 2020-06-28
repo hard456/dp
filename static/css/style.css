@@ -1,3 +1,9 @@
-.no_underline22 {
+.no_underline {
   text-decoration: none !important
+}
+
+#spinner {
+  display:none;
+  width: 3rem;
+  height: 3rem;
 }

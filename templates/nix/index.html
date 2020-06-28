@@ -1,7 +1,14 @@
 {% extends 'nix/default.html' %}
 
 {% block content %}
+
     <div class="container">
+
+    <div class="d-flex justify-content-center">
+  <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
 
 {% if error_message %}
     <div class="alert alert-danger">
@@ -9,11 +16,12 @@
     </div>
   {% endif %}
 
-    <form action="/upload/" method="post" enctype="multipart/form-data">
+    <form id="uploadFileForm" action="/upload/" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="file" class="form-control-file border" name="myfile" accept=".nix,.h5">
-    <button class="btn btn-success float-right mt-2" type="submit">Upload</button>
+    <button id="experimentUploadButton" class="btn btn-success float-right mt-2" onclick="submitUploadExperiment()">Upload</button>
   </form>
 
     </div>
+
 {% endblock %}
