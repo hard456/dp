@@ -1,0 +1,12 @@
+{% extends 'nix/default.html' %}
+
+{% block content %}
+file experiment
+    {% if error_message %}
+    <div class="alert alert-danger">
+        {{ error_message }}
+    </div>
+{#        <a href="/media/experiments/{{ error_message }}/file/teest.nix" download>Download</a>#}
+  {% endif %}
+{% endblock %}
+

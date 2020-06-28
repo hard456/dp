@@ -1,32 +1,41 @@
 import os
 
 import nixio as nix
+import uuid
 from django.core.files.storage import FileSystemStorage
-from django.shortcuts import render
-
-# Create your views here.
+from django.shortcuts import render, redirect
 
 
 def index(request):
     return render(request, 'nix/index.html')
 
 
-def simple_upload(request):
-    if request.method == 'POST' and request.FILES['myfile']:
-        myfile = request.FILES['myfile']
+def show_file(request, id):
+    return render(request, 'nix/file.html', {
+        'error_message': id
+    })
+
+
+def upload_experiment(request):
+    if request.method == 'POST' and request.FILES.get('myfile', False):
+        file = request.FILES['myfile']
+        file_name = file.name.lower()
+        if not file_name.endswith('.nix') and not file_name.endswith('.h5'):
+            return render(request, 'nix/index.html', {
+                'error_message': "The file can only have a .nix or .h5 extension."
+            })
+        experiment_id = str(uuid.uuid1().int)
         fs = FileSystemStorage()
-        filename = fs.save(myfile.name, myfile)
-        uploaded_file_url = fs.url(filename)
-    #     return render(request, 'core/simple_upload.html', {
-    #         'uploaded_file_url': uploaded_file_url
-    #     })
-    # return render(request, 'core/simple_upload.html')
-        return render(request, 'nix/test.html')
+        fs.save('experiments/' + experiment_id + '/' + file_name, file)
+        return redirect('/experiment/' + experiment_id + '/file')
+    return render(request, 'nix/index.html', {
+        'error_message': "No file was selected or the post method was not selected."
+    })
 
 
 def testik(request):
     module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../experiments/file_create_example.h5')
+    file_path = os.path.join(module_dir, '../media/experiments/test3.nix')
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
 
     print(nix_file.format, nix_file.version, nix_file.created_at)

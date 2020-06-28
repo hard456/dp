@@ -2,9 +2,18 @@
 
 {% block content %}
     <div class="container">
-        <form method="post">
-            <input type="file" class="form-control-file border">
-            <button type="submit" class="btn btn-success float-right mt-2">Odeslat</button>
-        </form>
+
+{% if error_message %}
+    <div class="alert alert-danger">
+        {{ error_message }}
+    </div>
+  {% endif %}
+
+    <form action="/upload/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" class="form-control-file border" name="myfile" accept=".nix,.h5">
+    <button class="btn btn-success float-right mt-2" type="submit">Upload</button>
+  </form>
+
     </div>
 {% endblock %}
