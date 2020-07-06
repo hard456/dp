@@ -3,8 +3,8 @@ import os
 import nixio as nix
 import uuid
 from django.core.files.storage import FileSystemStorage
+from django.http import FileResponse, response
 from django.shortcuts import render, redirect
-from django.conf import settings
 
 
 def index(request):
@@ -19,9 +19,10 @@ def show_experiment(request, id):
     files = fs.listdir('experiments/' + id + '/')[1]
 
     # loop files in directory
-    for i in files:
-        if i.endswith(".nix") or i.endswith(".h5"):
-            file_name = i
+    for file in files:
+        if file.endswith(".nix") or file.endswith(".h5"):
+            file_name = file
+            break
 
     # open nix file
     module_dir = os.path.dirname(__file__)  # get current directory
@@ -37,6 +38,22 @@ def show_experiment(request, id):
         'file_format': file_format,
         'file_version': version
     })
+
+
+def download_experiment(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+
+    files = fs.listdir('experiments/' + id + '/')[1]
+
+    # loop files in directory
+    for file in files:
+        if file.endswith(".nix") or file.endswith(".h5"):
+            file_name = file
+            break
+
+    return FileResponse(fs.open('experiments/' + id + '/' + file_name, 'rb'), content_type='application/force-download')
 
 
 def show_json_ld(request, id):
@@ -86,7 +103,7 @@ def upload_experiment(request):
                 break
 
         fs.save('experiments/' + experiment_id + '/' + file_name, file)
-        return redirect('/experiment/' + experiment_id + '/file')
+        return redirect('/experiment/' + experiment_id + '/experiment')
     return render(request, 'nix/index.html', {
         'error_message': "No file was selected or the post method was not selected."
     })
