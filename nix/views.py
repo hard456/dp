@@ -11,12 +11,31 @@ def index(request):
     return render(request, 'nix/index.html')
 
 
-def show_file(request, id):
+def show_experiment(request, id):
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):
         return render(request, '404.html')
-    return render(request, 'nix/file.html', {
-        'experiment_id': id
+
+    files = fs.listdir('experiments/' + id + '/')[1]
+
+    # loop files in directory
+    for i in files:
+        if i.endswith(".nix") or i.endswith(".h5"):
+            file_name = i
+
+    # open nix file
+    module_dir = os.path.dirname(__file__)  # get current directory
+    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
+    nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
+    file_format = nix_file.format
+    version = nix_file.version
+    nix.File.close(nix_file)
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'experiment_name': file_name,
+        'file_format': file_format,
+        'file_version': version
     })
 
 

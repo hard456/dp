@@ -1,0 +1,21 @@
+{% extends 'nix/default.html' %}
+
+{% block content %}
+
+    <div class="container mt-4">
+
+        <div class="jumbotron">
+        <h2>Experiment</h2><br>
+        EXPERIMENT_ID : {{ experiment_id }}<br>
+        FILE_FORMAT : {{ file_format }}<br>
+        FILE_VERSION : {{ file_version }}<br><br>
+        The name of the experiment file is {{ experiment_name }}. You can download this file <b>here</b>.
+        </div>
+
+    </div>
+
+
+    {#        <a href="/media/experiments/{{ error_message }}/file/teest.nix" download>Download</a>#}
+
+{% endblock %}
+
