@@ -12,6 +12,9 @@ def index(request):
 
 
 def show_experiment(request, id):
+    error_message = ""
+    file_format = ""
+    version = ""
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):
         return render(request, '404.html')
@@ -27,12 +30,17 @@ def show_experiment(request, id):
     # open nix file
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
-    nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
-    file_format = nix_file.format
-    version = nix_file.version
-    nix.File.close(nix_file)
+
+    try:
+        nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
+        file_format = nix_file.format
+        version = nix_file.version
+        nix.File.close(nix_file)
+    except:
+        error_message = "An error occurred while opening the NIX file."
 
     return render(request, 'nix/experiment.html', {
+        'error_message': error_message,
         'experiment_id': id,
         'experiment_name': file_name,
         'file_format': file_format,
@@ -56,11 +64,41 @@ def download_experiment(request, id):
     return FileResponse(fs.open('experiments/' + id + '/' + file_name, 'rb'), content_type='application/force-download')
 
 
-def show_json_ld(request, id):
+def download_json_ld(request, id):
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):
         return render(request, '404.html')
+
+    files = fs.listdir('experiments/' + id + '/')[1]
+
+    # loop files in directory
+    for file in files:
+        if file.endswith(".jsonld"):
+            file_name = file
+            break
+
+    return FileResponse(fs.open('experiments/' + id + '/' + file_name, 'rb'), content_type='application/force-download')
+
+
+def show_json_ld(request, id):
+    fs = FileSystemStorage()
+    file_name = ""
+    file_created = False
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+
+    files = fs.listdir('experiments/' + id + '/')[1]
+
+    # loop files in directory
+    for file in files:
+        if file.endswith(".jsonld"):
+            file_name = file
+            file_created = True
+            break
+
     return render(request, 'nix/json-ld.html', {
+        'file_name': file_name,
+        'file_created': file_created,
         'experiment_id': id
     })
 

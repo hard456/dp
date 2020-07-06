@@ -5,11 +5,17 @@
     <div class="container mt-4">
 
     <div class="jumbotron">
-        <h2>JSON-LD</h2>
+        <h2>JSON-LD</h2><br>
+    {% if file_created %}
+        Experiment metadata has already been converted to JSON-LD format.<br><br>
+
+        The name of the JSON-LD file is {{ file_name }}. You can download this file <b><a
+                href="{% url 'download_json_ld' id=experiment_id %}">here</a></b>.
+    {% else %}
+        není
+    {% endif %}
     </div>
 
     </div>
-
-    {#        <a href="/media/experiments/{{ error_message }}/file/teest.nix" download>Download</a>#}
 
 {% endblock %}
