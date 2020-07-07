@@ -147,6 +147,15 @@ def upload_experiment(request):
     })
 
 
+def convert_experiment(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/json-ld.html', {
+        'experiment_id': id
+    })
+
+
 def process_query(request, id):
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):

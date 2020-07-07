@@ -8,6 +8,7 @@ urlpatterns = [
     path("experiment/<slug:id>/experiment", views.show_experiment, name="experiment"),
     path("experiment/<slug:id>/experiment/download", views.download_experiment, name="download_experiment"),
     path("experiment/<slug:id>/json-ld", views.show_json_ld, name="json-ld"),
+    path("experiment/<slug:id>/json-ld/convert", views.convert_experiment, name="convert_experiment"),
     path("experiment/<slug:id>/json-ld/download", views.download_json_ld, name="download_json_ld"),
     path("experiment/<slug:id>/sparql", views.show_sparql, name="sparql"),
     path("experiment/<slug:id>/query", views.process_query, name="query"),
