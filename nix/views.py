@@ -2,9 +2,14 @@ import os
 
 import nixio as nix
 import uuid
+
+import rdflib
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse, response
 from django.shortcuts import render, redirect
+from SPARQLWrapper import SPARQLWrapper
+from rdflib import Graph
+import requests
 
 
 def index(request):
@@ -160,8 +165,20 @@ def process_query(request, id):
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):
         return render(request, '404.html')
+
+    query = request.POST.get("query", "")
+
+    module_dir = os.path.dirname(__file__)  # get current directory
+    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + 'test.jsonld')
+    g = Graph()
+    result = g.parse(file_path, format="json-ld")
+    # query_result = g.serialize(format="n3").decode("utf-8")
+    # q = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?subject ?object WHERE {?subject foaf:name ?object}"
+    query_result = g.query(query)
+
     return render(request, 'nix/sparql.html', {
-        'experiment_id': id
+        'experiment_id': id,
+        'query_result': query_result
     })
 
 

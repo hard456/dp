@@ -4,25 +4,30 @@
 
     <div class="container mt-4">
 
-    <div class="jumbotron">
-        <h2>SPARQL</h2>
-        <div class="d-flex justify-content-center">
-                    <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-        </div>
-        <div class="form-group">
-            <form id="queryForm" action="{% url 'query' id=experiment_id %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-            <label for="exampleFormControlTextarea1">Write a query:</label>
-            <textarea class="form-control" id="query" rows="5"></textarea>
-            <button id="queryButton" class="btn btn-primary float-right mt-3"
-                                onclick="submitQuery()">Process
-                        </button>
+        <div class="jumbotron">
+            <h2>SPARQL</h2>
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <form id="queryForm" action="{% url 'query' id=experiment_id %}" method="post"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="exampleFormControlTextarea1">Write a query:</label>
+                    <textarea class="form-control" name="query" rows="5">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;&#013SELECT ?subject ?object&#013WHERE {?subject foaf:name ?object}</textarea>
+                    <button id="queryButton" class="btn btn-primary float-right mt-3"
+                            onclick="submitQuery()">Process
+                    </button>
                 </form>
+            </div>
+
+            {% if query_result %}
+                <div class="row col-12"><h4>Results:</h4></div>
+                <textarea class="form-control form-group" id="query" rows="15">{% for row in query_result %}{{  }} {{ r.pred }} {{ r.obj }} .{% endfor %}</textarea>
+            {% endif %}
+
         </div>
     </div>
-
-    </div>
-
 {% endblock %}
