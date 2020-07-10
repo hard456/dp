@@ -16,7 +16,11 @@
                       enctype="multipart/form-data">
                     {% csrf_token %}
                     <label for="exampleFormControlTextarea1">Write a query:</label>
-                    <textarea class="form-control" name="query" rows="5">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;&#013SELECT ?subject ?object&#013WHERE {?subject foaf:name ?object}</textarea>
+                    {% if query %}
+                        <textarea class="form-control" name="query" rows="5">{{ query }}</textarea>
+                    {% else %}
+                        <textarea class="form-control" name="query" rows="5">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;&#013SELECT ?subject ?object&#013WHERE {?subject foaf:name ?object}</textarea>
+                    {% endif %}
                     <button id="queryButton" class="btn btn-primary float-right mt-3"
                             onclick="submitQuery()">Process
                     </button>
@@ -25,7 +29,7 @@
 
             {% if query_result %}
                 <div class="row col-12"><h4>Results:</h4></div>
-                <textarea class="form-control form-group" id="query" rows="15">{% for row in query_result %}{{  }} {{ r.pred }} {{ r.obj }} .{% endfor %}</textarea>
+                <textarea class="form-control form-group" id="query" rows="15">{% for row in query_result %}{% for i in row %}{{ i }} {% endfor %} .&#10{% endfor %}</textarea>
             {% endif %}
 
         </div>

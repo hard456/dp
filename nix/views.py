@@ -162,21 +162,39 @@ def convert_experiment(request, id):
 
 
 def process_query(request, id):
+    error_message = ""
+    query_result = ""
+    file_created = False
     fs = FileSystemStorage()
     if not fs.exists('experiments/' + id + '/'):
         return render(request, '404.html')
 
     query = request.POST.get("query", "")
 
-    module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + 'test.jsonld')
-    g = Graph()
-    result = g.parse(file_path, format="json-ld")
-    # query_result = g.serialize(format="n3").decode("utf-8")
-    # q = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?subject ?object WHERE {?subject foaf:name ?object}"
-    query_result = g.query(query)
+    files = fs.listdir('experiments/' + id + '/')[1]
+
+    # loop files in directory
+    for file in files:
+        if file.endswith(".jsonld"):
+            file_name = file
+            file_created = True
+            break
+
+    if file_created:
+        module_dir = os.path.dirname(__file__)  # get current directory
+        file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
+        g = Graph()
+        try:
+            result = g.parse(file_path, format="json-ld")
+            query_result = g.query(query)
+        except:
+            error_message = "An error occurred while executing the query."
+    else:
+        error_message = "The JSON-LD file has not been created yet."
 
     return render(request, 'nix/sparql.html', {
+        'error_message': error_message,
+        'query': query,
         'experiment_id': id,
         'query_result': query_result
     })
