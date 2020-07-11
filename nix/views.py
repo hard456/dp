@@ -2,7 +2,7 @@ import os
 
 import nixio as nix
 import uuid
-
+from nix import utils
 import rdflib
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse, response
@@ -17,39 +17,15 @@ def index(request):
 
 
 def show_experiment(request, id):
-    error_message = ""
-    file_format = ""
-    version = ""
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
+
+    if not utils.is_experiment_exists(id):
         return render(request, '404.html')
 
-    files = fs.listdir('experiments/' + id + '/')[1]
-
-    # loop files in directory
-    for file in files:
-        if file.endswith(".nix") or file.endswith(".h5"):
-            file_name = file
-            break
-
-    # open nix file
-    module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
-
-    try:
-        nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
-        file_format = nix_file.format
-        version = nix_file.version
-        nix.File.close(nix_file)
-    except:
-        error_message = "An error occurred while opening the NIX file."
+    file_names = utils.get_file_names(id)
 
     return render(request, 'nix/experiment.html', {
-        'error_message': error_message,
         'experiment_id': id,
-        'experiment_name': file_name,
-        'file_format': file_format,
-        'file_version': version
+        'files': file_names
     })
 
 
@@ -127,25 +103,25 @@ def show_sparql(request, id):
 
 
 def upload_experiment(request):
-    if request.method == 'POST' and request.FILES.get('myfile', False):
-        file = request.FILES['myfile']
-        file_name = file.name.lower()
+    if request.method == 'POST' and request.FILES.getlist('myfile', False):
+        files = request.FILES.getlist('myfile')
 
-        # check file extension
-        if not file_name.endswith('.nix') and not file_name.endswith('.h5'):
+        # checks unique file names
+        if not utils.check_unique_file_names(files):
+            return render(request, 'nix/index.html', {
+                'error_message': "The files do not have a unique name."
+            })
+
+        # checks file extensions
+        if not utils.check_file_extensions(files):
             return render(request, 'nix/index.html', {
                 'error_message': "The file can only have a .nix or .h5 extension."
             })
 
-        fs = FileSystemStorage()
+        # generates unique experiment id
+        experiment_id = utils.generate_experiment_id()
 
-        # check unique experiment id
-        while True:
-            experiment_id = str(uuid.uuid1().int)
-            if not fs.exists('experiments/' + experiment_id + '/'):
-                break
-
-        fs.save('experiments/' + experiment_id + '/' + file_name, file)
+        utils.save_files(files, experiment_id)
         return redirect('/experiment/' + experiment_id + '/experiment')
     return render(request, 'nix/index.html', {
         'error_message': "No file was selected or the post method was not selected."
@@ -204,6 +180,19 @@ def testik(request):
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, '../media/experiments/test3.nix')
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
+
+
+    # open nix file
+    # module_dir = os.path.dirname(__file__)  # get current directory
+    # file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
+    #
+    # try:
+    #     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
+    #     file_format = nix_file.format
+    #     version = nix_file.version
+    #     nix.File.close(nix_file)
+    # except:
+    #     error_message = "An error occurred while opening the NIX file."
 
     print(nix_file.format, nix_file.version, nix_file.created_at)
     sections = nix_file.pprint()
