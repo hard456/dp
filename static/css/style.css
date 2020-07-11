@@ -11,3 +11,8 @@
 .table > tbody > tr > td {
      vertical-align: middle;
 }
+
+.h4-v2 {
+  display:inline-block;
+  float:left;
+}

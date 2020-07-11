@@ -8,16 +8,18 @@
             <h2>Experiment</h2><br>
             EXPERIMENT_ID : {{ experiment_id }}<br>
 
-{#            The name of the experiment file is {{ experiment_name }}. You can download this file <b><a#}
-{#                href="{% url 'download_experiment' id=experiment_id %}">here</a></b>.#}
+            {# NIX FILES #}
             <hr>
-            <h4>Files</h4>
-            <div style="background-color: white; width: auto; height: auto">
-            <table class="table">
+            <h4 class="h4-v2 mr-2 mb-4">Files</h4>
+            <form action="{% url 'download' id=experiment_id name='test.nix' %}">
+                {% csrf_token %}
+                <input type="submit" class="btn-sm btn-danger center" value="Convert All"/>
+            </form>
+            <table class="table" style="background-color: white;">
                 <thead>
                 <tr>
                     <th>File name</th>
-                    <th></th>
+                    <th>Metadata</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -25,16 +27,69 @@
                 {% for file in files %}
                     <tr>
                         <td>{{ file }}</td>
-                        <td>Doe</td>
-                        <td>
-                            <form action="https://google.com">
-                                <input type="submit" class="btn-sm btn-primary center" value="Download" />
+                        <td class="text">
+                            <form action="{% url 'download' id=experiment_id name=file %}">
+                                {% csrf_token %}
+                                <input type="submit" class="btn-sm btn-danger center" value="Convert"/>
+                            </form>
+                        </td>
+                        <td class="text-right">
+                            <form action="{% url 'download' id=experiment_id name=file %}">
+                                {% csrf_token %}
+                                <input type="submit" class="btn-sm btn-primary center" value="Download"/>
                             </form>
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
+
+            {# JSON-LD FILES #}
+            {% if transformed_files %}
+                <h4 class="mb-2 mt-4">Transformed files</h4>
+                <table class="table" style="background-color: white;">
+                    <thead>
+                    <tr>
+                        <th>File name</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for file in transformed_files %}
+                        <tr>
+                            <td>{{ file }}</td>
+                            <td class="text-right">
+                                <form action="{% url 'download' id=experiment_id name=file %}">
+                                    <input type="submit" class="btn-sm btn-primary center" value="Download"/>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+
+            {# UPLOAD EXPERIMENTS #}
+            <hr>
+            <h4 class="mb-3">Upload files</h4>
+            <span>Select nix files (.nix, .h5)</span>
+            <div class="pb-5">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <form id="uploadFilesForm" action="{% url 'upload_files' id=experiment_id %}" method="post"
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="file" class="form-control-file bg-secondary text-white border" name="upload_files"
+                               accept=".nix,.h5" multiple>
+                        <button id="uploadFilesButton" class="btn btn-primary float-right mt-2"
+                                onclick="submitUploadFiles()">Upload
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -1,0 +1,44 @@
+{% extends 'nix/default.html' %}
+
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="jumbotron">
+            <h2>Metadata</h2><br>
+            {% if not transformed_files %}
+                No JSON-LD file found.
+            {% else %}
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div class="form-group pb-5">
+                    <form id="showMetadataForm" action="{% url 'show_metadata' id=experiment_id %}"
+                          method="post">
+                        {% csrf_token %}
+                        <label>Select JSON-LD file:</label>
+                        <select class="form-control" name="transformed_file">
+                            {% for file in transformed_files %}
+                                {% if selected_file and selected_file == file %}
+                                    <option selected>{{ file }}</option>
+                                {% else %}
+                                    <option>{{ file }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button id="showMetadataButton" class="btn btn-primary float-right mt-2"
+                                onclick="submitShowMetadata()">Show metadata
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+            {% if file_content %}
+                <div class="row col-12"><h4>Result:</h4></div>
+                <textarea class="form-control form-group" id="query" rows="15">{% autoescape on %}{{ file_content }}{% endautoescape %}</textarea>
+            {% endif %}
+
+        </div>
+    </div>
+
+{% endblock %}

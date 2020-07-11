@@ -1,7 +1,7 @@
 import os
 
 import nixio as nix
-import uuid
+from idna import unicode
 from nix import utils
 import rdflib
 from django.core.files.storage import FileSystemStorage
@@ -12,109 +12,72 @@ from rdflib import Graph
 import requests
 
 
-def index(request):
-    return render(request, 'nix/index.html')
+def show_home_page(request):
+    return render(request, 'nix/upload_experiment.html')
 
 
-def show_experiment(request, id):
+def show_experiment_page(request, id):
+    if not utils.is_experiment_exists(id):
+        return render(request, '404.html')
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'transformed_files': utils.get_transformed_names(id),
+        'files': utils.get_file_names(id)
+    })
+
+
+def download_file(request, id, name):
+    fs = FileSystemStorage()
+    if not utils.is_file_exists(id, name):
+        return render(request, '404.html')
+
+    return FileResponse(fs.open('experiments/' + id + '/' + name, 'rb'), content_type='application/force-download')
+
+
+def show_metadata_page(request, id):
 
     if not utils.is_experiment_exists(id):
         return render(request, '404.html')
 
-    file_names = utils.get_file_names(id)
+    return render(request, 'nix/metadata.html', {
+        'transformed_files': utils.get_transformed_names(id),
+        'experiment_id': id
+    })
 
-    return render(request, 'nix/experiment.html', {
+
+def show_signal_page(request, id):
+    fs = FileSystemStorage()
+    if not fs.exists('experiments/' + id + '/'):
+        return render(request, '404.html')
+    return render(request, 'nix/signal.html', {
+        'experiment_id': id
+    })
+
+
+def show_find_page(request, id):
+    if not utils.is_experiment_exists(id):
+        return render(request, '404.html')
+
+    return render(request, 'nix/find.html', {
         'experiment_id': id,
-        'files': file_names
-    })
-
-
-def download_experiment(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-
-    files = fs.listdir('experiments/' + id + '/')[1]
-
-    # loop files in directory
-    for file in files:
-        if file.endswith(".nix") or file.endswith(".h5"):
-            file_name = file
-            break
-
-    return FileResponse(fs.open('experiments/' + id + '/' + file_name, 'rb'), content_type='application/force-download')
-
-
-def download_json_ld(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-
-    files = fs.listdir('experiments/' + id + '/')[1]
-
-    # loop files in directory
-    for file in files:
-        if file.endswith(".jsonld"):
-            file_name = file
-            break
-
-    return FileResponse(fs.open('experiments/' + id + '/' + file_name, 'rb'), content_type='application/force-download')
-
-
-def show_json_ld(request, id):
-    fs = FileSystemStorage()
-    file_name = ""
-    file_created = False
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-
-    files = fs.listdir('experiments/' + id + '/')[1]
-
-    # loop files in directory
-    for file in files:
-        if file.endswith(".jsonld"):
-            file_name = file
-            file_created = True
-            break
-
-    return render(request, 'nix/json-ld.html', {
-        'file_name': file_name,
-        'file_created': file_created,
-        'experiment_id': id
-    })
-
-
-def show_graph(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-    return render(request, 'nix/graph.html', {
-        'experiment_id': id
-    })
-
-
-def show_sparql(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-    return render(request, 'nix/sparql.html', {
-        'experiment_id': id
+        'transformed_files': utils.get_transformed_names(id)
     })
 
 
 def upload_experiment(request):
-    if request.method == 'POST' and request.FILES.getlist('myfile', False):
-        files = request.FILES.getlist('myfile')
+    if request.FILES.getlist('upload_files', True):
+        files = request.FILES.getlist('upload_files')
 
         # checks unique file names
         if not utils.check_unique_file_names(files):
-            return render(request, 'nix/index.html', {
+            return render(request, 'nix/upload_experiment.html', {
                 'error_message': "The files do not have a unique name."
             })
 
         # checks file extensions
         if not utils.check_file_extensions(files):
-            return render(request, 'nix/index.html', {
+            return render(request, 'nix/upload_experiment.html', {
                 'error_message': "The file can only have a .nix or .h5 extension."
             })
 
@@ -123,56 +86,64 @@ def upload_experiment(request):
 
         utils.save_files(files, experiment_id)
         return redirect('/experiment/' + experiment_id + '/experiment')
-    return render(request, 'nix/index.html', {
-        'error_message': "No file was selected or the post method was not selected."
-    })
+
+    return render(request, 'nix/upload_experiment.html', {
+            'error_message': "No file selected."
+        })
 
 
-def convert_experiment(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
+def show_metadata(request, id):
+    file_name = request.POST.get("transformed_file", "")
+
+    if file_name == "" or not utils.is_file_exists(id, file_name):
         return render(request, '404.html')
-    return render(request, 'nix/json-ld.html', {
-        'experiment_id': id
+
+    return render(request, 'nix/metadata.html', {
+        'experiment_id': id,
+        'transformed_files': utils.get_transformed_names(id),
+        'selected_file': file_name,
+        'file_content': unicode(utils.read_file(id, file_name), "utf-8")
     })
 
 
 def process_query(request, id):
     error_message = ""
     query_result = ""
-    file_created = False
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
+
+    file_name = request.POST.get("transformed_file", "")
+    if file_name == "" or not utils.is_file_exists(id, file_name):
         return render(request, '404.html')
 
     query = request.POST.get("query", "")
 
-    files = fs.listdir('experiments/' + id + '/')[1]
+    module_dir = os.path.dirname(__file__)  # get current directory
+    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
+    g = Graph()
+    try:
+        result = g.parse(file_path, format="json-ld")
+        query_result = g.query(query)
+    except:
+        error_message = "An error occurred while executing the query."
 
-    # loop files in directory
-    for file in files:
-        if file.endswith(".jsonld"):
-            file_name = file
-            file_created = True
-            break
-
-    if file_created:
-        module_dir = os.path.dirname(__file__)  # get current directory
-        file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
-        g = Graph()
-        try:
-            result = g.parse(file_path, format="json-ld")
-            query_result = g.query(query)
-        except:
-            error_message = "An error occurred while executing the query."
-    else:
-        error_message = "The JSON-LD file has not been created yet."
-
-    return render(request, 'nix/sparql.html', {
+    return render(request, 'nix/find.html', {
         'error_message': error_message,
         'query': query,
         'experiment_id': id,
-        'query_result': query_result
+        'query_result': query_result,
+        'transformed_files': utils.get_transformed_names(id),
+        'selected_file': file_name
+    })
+
+
+def upload_files(request, id):
+    if request.FILES.getlist('upload_files', False):
+        files = request.FILES.getlist('upload_files')
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'error_message': "No file selected.",
+        'transformed_files': utils.get_transformed_names(id),
+        'files': utils.get_file_names(id)
     })
 
 

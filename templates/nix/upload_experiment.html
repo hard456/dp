@@ -6,7 +6,7 @@
 
         <div class="jumbotron">
             <h2 class="mb-3">Upload experiment</h2>
-            <span>Select a nix file to upload your experiment (.nix, .h5)</span>
+            <span>Select nix files to upload your experiment (.nix, .h5)</span>
             <div class="pb-5">
                 <div class="d-flex justify-content-center">
                     <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
@@ -14,11 +14,12 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <form id="uploadExperimentForm" action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+                    <form id="uploadExperimentForm" action="{% url 'upload_experiment' %}" method="post"
+                          enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input type="file" class="form-control-file bg-secondary text-white border" name="myfile"
+                        <input type="file" class="form-control-file bg-secondary text-white border" name="upload_files"
                                accept=".nix,.h5" multiple>
-                        <button id="experimentUploadButton" class="btn btn-primary float-right mt-3"
+                        <button id="uploadExperimentButton" class="btn btn-primary float-right mt-3"
                                 onclick="submitUploadExperiment()">Upload
                         </button>
                     </form>

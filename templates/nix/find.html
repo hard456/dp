@@ -1,0 +1,50 @@
+{% extends 'nix/default.html' %}
+
+{% block content %}
+
+    <div class="container mt-4">
+
+        <div class="jumbotron">
+            <h2>Find metadata</h2><br>
+            {% if not transformed_files %}
+                No JSON-LD file found.
+            {% else %}
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary m-5" id="spinner" role="status" aria-hidden="true">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <form id="findMetadataForm" action="{% url 'query' id=experiment_id %}" method="post"
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label for="exampleFormControlTextarea1">Write a query in SPARQL:</label>
+                        {% if query %}
+                            <textarea class="form-control" name="query" rows="5">{{ query }}</textarea>
+                        {% else %}
+                            <textarea class="form-control" name="query" rows="5">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;&#013SELECT ?subject ?object&#013WHERE {?subject foaf:name ?object}</textarea>
+                        {% endif %}
+                        <label class="mt-2">Select JSON-LD file:</label>
+                        <select class="form-control" name="transformed_file">
+                            {% for file in transformed_files %}
+                                {% if selected_file and selected_file == file %}
+                                    <option selected>{{ file }}</option>
+                                {% else %}
+                                    <option>{{ file }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button id="findMetadataButton" class="btn btn-primary float-right mt-2"
+                                onclick="submitFindMetadata()">Find metadata
+                        </button>
+                    </form>
+                </div>
+
+                {% if query_result %}
+                    <div class="row col-12"><h4>Results:</h4></div>
+                    <textarea class="form-control form-group" id="query" rows="15">{% for row in query_result %}{% for i in row %}{{ i }} {% endfor %} .&#10{% endfor %}</textarea>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,4 +1,3 @@
-import uuid
 import random
 from django.core.files.storage import FileSystemStorage
 
@@ -15,12 +14,18 @@ def generate_experiment_id():
     return experiment_id
 
 
+def is_file_exists(experiment_id, file_name):
+    if fs.exists('experiments/' + experiment_id + '/' + file_name):
+        return True
+    return False
+
+
 def check_unique_file_names(files):
     if len(files) == 1:
         return True
 
-    for i in range(0, len(files)-1):
-        for j in range(i+1, len(files) - 1):
+    for i in range(0, len(files) - 1):
+        for j in range(i + 1, len(files) - 1):
             if files[i].name == files[j].name:
                 return False
 
@@ -61,5 +66,21 @@ def get_file_names(experiment_id):
             if file.endswith(file_extensions[i]):
                 nix_files.append(file)
                 break
-
+    nix_files.sort()
     return nix_files
+
+
+def get_transformed_names(experiment_id):
+    all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
+    json_ld_files = list()
+    # loop files in directory
+    for file in all_files:
+        if file.endswith('.jsonld'):
+            json_ld_files.append(file)
+    json_ld_files.sort()
+    return json_ld_files
+
+
+def read_file(experiment_id, file_name):
+    file = fs.open('experiments/' + experiment_id + '/' + file_name)
+    return file.read()

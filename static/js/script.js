@@ -1,17 +1,23 @@
 function submitUploadExperiment() {
         $('#spinner').css({'display': 'block'});
-        $('#experimentUploadButton').prop('disabled', true);
+        $('#uploadExperimentButton').prop('disabled', true);
         $("#uploadExperimentForm").submit();
 }
 
-function submitQuery() {
+function submitFindMetadata() {
         $('#spinner').css({'display': 'block'});
-        $('#queryButton').prop('disabled', true);
-        $("#queryForm").submit();
+        $('#findMetadataButton').prop('disabled', true);
+        $("#findMetadataForm").submit();
 }
 
-function submitConvertMetadata() {
+function submitShowMetadata() {
         $('#spinner').css({'display': 'block'});
-        $('#convertMetadataButton').prop('disabled', true);
-        $("#convertMetadataForm").submit();
+        $('#showMetadataButton').prop('disabled', true);
+        $("#showMetadataForm").submit();
+}
+
+function submitUploadFiles() {
+        $('#spinner').css({'display': 'block'});
+        $('#uploadFilesButton').prop('disabled', true);
+        $("#uploadFilesForm").submit();
 }
