@@ -139,6 +139,31 @@ def upload_files(request, id):
     if request.FILES.getlist('upload_files', False):
         files = request.FILES.getlist('upload_files')
 
+        # checks file extensions
+        if not utils.check_file_extensions(files):
+            return render(request, 'nix/experiment.html', {
+                'experiment_id': id,
+                'error_message': "The file can only have a .nix or .h5 extension.",
+                'transformed_files': utils.get_transformed_names(id),
+                'files': utils.get_file_names(id)
+            })
+
+        # checks unique file names
+        if not utils.check_files_names_experiment(files,id):
+            return render(request, 'nix/experiment.html', {
+                'experiment_id': id,
+                'error_message': "Files do not contain unique names.",
+                'transformed_files': utils.get_transformed_names(id),
+                'files': utils.get_file_names(id)
+            })
+
+        utils.save_files(files, id)
+        return render(request, 'nix/experiment.html', {
+            'experiment_id': id,
+            'success_message': "File upload successful.",
+            'transformed_files': utils.get_transformed_names(id),
+            'files': utils.get_file_names(id)
+        })
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': "No file selected.",

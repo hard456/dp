@@ -26,9 +26,20 @@ def check_unique_file_names(files):
 
     for i in range(0, len(files) - 1):
         for j in range(i + 1, len(files) - 1):
-            if files[i].name == files[j].name:
+            if files[i].name.lower() == files[j].name.lower():
                 return False
 
+    return True
+
+
+def check_files_names_experiment(files, experiment_id):
+    if not check_unique_file_names(files):
+        return False
+    experiment_files = get_file_names(experiment_id)
+    for file in files:
+        for experiment_file in experiment_files:
+            if file.name.lower() == experiment_file:
+                return False
     return True
 
 
