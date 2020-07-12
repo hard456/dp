@@ -9,45 +9,55 @@
             EXPERIMENT_ID : {{ experiment_id }}<br>
 
             {# NIX FILES #}
-            <hr>
-            <h4 class="h4-v2 mr-2 mb-4">Files</h4>
-            <form action="{% url 'download' id=experiment_id name='test.nix' %}">
-                {% csrf_token %}
-                <input type="submit" class="btn-sm btn-danger center" value="Convert All"/>
-            </form>
-            <table class="table" style="background-color: white;">
-                <thead>
-                <tr>
-                    <th>File name</th>
-                    <th>Metadata</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for file in files %}
+            {% if files %}
+                <hr>
+                <h4 class="h4-v2 mr-2 mb-4">Files</h4>
+                <form action="{% url 'download' id=experiment_id name='test.nix' %}">
+                    {% csrf_token %}
+                    <input type="submit" class="btn-sm btn-danger center" value="Convert All"/>
+                </form>
+                <table class="table bg-white">
+                    <thead>
                     <tr>
-                        <td>{{ file }}</td>
-                        <td class="text">
-                            <form action="{% url 'download' id=experiment_id name=file %}">
-                                {% csrf_token %}
-                                <input type="submit" class="btn-sm btn-danger center" value="Convert"/>
-                            </form>
-                        </td>
-                        <td class="text-right">
-                            <form action="{% url 'download' id=experiment_id name=file %}">
-                                {% csrf_token %}
-                                <input type="submit" class="btn-sm btn-primary center" value="Download"/>
-                            </form>
-                        </td>
+                        <th>File name</th>
+                        <th>Metadata</th>
+                        <th></th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for file in files %}
+                        <tr>
+                            <td>{{ file }}</td>
+                            <td class="text">
+                                <form method="post" action="{% url 'download' id=experiment_id name=file %}">
+                                    {% csrf_token %}
+                                    <input type="submit" class="btn-sm btn-success center" value="Convert"/>
+                                </form>
+                            </td>
+                            <td class="text-right">
+                                <div class="row float-right">
+                                    <form method="post" action="{% url 'delete' id=experiment_id name=file %}">
+                                        {% csrf_token %}
+                                        <input type="submit"
+                                               onclick="return confirm('Are you sure you want to delete this file?')"
+                                               class="btn-sm btn-danger center mr-3" value="Delete"/>
+                                    </form>
+                                    <form method="post" action="{% url 'download' id=experiment_id name=file %}">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn-sm btn-primary center mr-3" value="Download"/>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
 
             {# JSON-LD FILES #}
             {% if transformed_files %}
                 <h4 class="mb-2 mt-4">Transformed files</h4>
-                <table class="table" style="background-color: white;">
+                <table class="table bg-white">
                     <thead>
                     <tr>
                         <th>File name</th>
@@ -59,9 +69,18 @@
                         <tr>
                             <td>{{ file }}</td>
                             <td class="text-right">
-                                <form action="{% url 'download' id=experiment_id name=file %}">
-                                    <input type="submit" class="btn-sm btn-primary center" value="Download"/>
-                                </form>
+                                <div class="row float-right">
+                                    <form method="post" action="{% url 'delete' id=experiment_id name=file %}">
+                                        {% csrf_token %}
+                                        <input type="submit"
+                                               onclick="return confirm('Are you sure you want to delete this file?')"
+                                               class="btn-sm btn-danger center mr-3"
+                                               value="Delete"/>
+                                    </form>
+                                    <form action="{% url 'download' id=experiment_id name=file %}">
+                                        <input type="submit" class="btn-sm btn-primary center mr-3" value="Download"/>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

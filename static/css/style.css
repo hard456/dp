@@ -16,3 +16,7 @@
   display:inline-block;
   float:left;
 }
+
+.bg-white{
+  background-color: #ffffff;
+}

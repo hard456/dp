@@ -35,8 +35,30 @@ def download_file(request, id, name):
     return FileResponse(fs.open('experiments/' + id + '/' + name, 'rb'), content_type='application/force-download')
 
 
-def show_metadata_page(request, id):
+def delete_file(request, id, name):
+    fs = FileSystemStorage()
+    if not utils.is_file_exists(id, name):
+        return render(request, '404.html')
 
+    try:
+        fs.delete('experiments/' + id + '/' + name)
+    except:
+        return render(request, 'nix/experiment.html', {
+            'experiment_id': id,
+            'error_message': "The file was not deleted.",
+            'transformed_files': utils.get_transformed_names(id),
+            'files': utils.get_file_names(id)
+        })
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'success_message': "The file was deleted.",
+        'transformed_files': utils.get_transformed_names(id),
+        'files': utils.get_file_names(id)
+    })
+
+
+def show_metadata_page(request, id):
     if not utils.is_experiment_exists(id):
         return render(request, '404.html')
 
@@ -85,11 +107,11 @@ def upload_experiment(request):
         experiment_id = utils.generate_experiment_id()
 
         utils.save_files(files, experiment_id)
-        return redirect('/experiment/' + experiment_id + '/experiment')
+        return redirect('/experiment/' + experiment_id + '/files')
 
     return render(request, 'nix/upload_experiment.html', {
-            'error_message': "No file selected."
-        })
+        'error_message': "No file selected."
+    })
 
 
 def show_metadata(request, id):
@@ -149,7 +171,7 @@ def upload_files(request, id):
             })
 
         # checks unique file names
-        if not utils.check_files_names_experiment(files,id):
+        if not utils.check_files_names_experiment(files, id):
             return render(request, 'nix/experiment.html', {
                 'experiment_id': id,
                 'error_message': "Files do not contain unique names.",
@@ -176,7 +198,6 @@ def testik(request):
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, '../media/experiments/test3.nix')
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
-
 
     # open nix file
     # module_dir = os.path.dirname(__file__)  # get current directory
