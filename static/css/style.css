@@ -20,3 +20,8 @@
 .bg-white{
   background-color: #ffffff;
 }
+
+#spinner-modal {
+  width: 3rem;
+  height: 3rem;
+}

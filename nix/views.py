@@ -158,6 +158,9 @@ def process_query(request, id):
 
 
 def upload_files(request, id):
+    if not utils.is_experiment_exists(id):
+        return render(request, '404.html')
+
     if request.FILES.getlist('upload_files', False):
         files = request.FILES.getlist('upload_files')
 
@@ -189,6 +192,30 @@ def upload_files(request, id):
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': "No file selected.",
+        'transformed_files': utils.get_transformed_names(id),
+        'files': utils.get_file_names(id)
+    })
+
+
+def convert_all(request, id):
+    if not utils.is_experiment_exists(id):
+        return render(request, '404.html')
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'success_message': "All files have been converted.",
+        'transformed_files': utils.get_transformed_names(id),
+        'files': utils.get_file_names(id)
+    })
+
+
+def convert_file(request, id, name):
+    if not utils.is_file_exists(id, name):
+        return render(request, '404.html')
+
+    return render(request, 'nix/experiment.html', {
+        'experiment_id': id,
+        'success_message': "The file has been converted.",
         'transformed_files': utils.get_transformed_names(id),
         'files': utils.get_file_names(id)
     })
