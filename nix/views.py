@@ -68,15 +68,6 @@ def show_metadata_page(request, id):
     })
 
 
-def show_signal_page(request, id):
-    fs = FileSystemStorage()
-    if not fs.exists('experiments/' + id + '/'):
-        return render(request, '404.html')
-    return render(request, 'nix/signal.html', {
-        'experiment_id': id
-    })
-
-
 def show_find_page(request, id):
     if not utils.is_experiment_exists(id):
         return render(request, '404.html')

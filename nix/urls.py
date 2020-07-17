@@ -15,5 +15,4 @@ urlpatterns = [
     path("experiment/<slug:id>/metadata/show", views.show_metadata, name="show_metadata"),
     path("experiment/<slug:id>/find", views.show_find_page, name="find"),
     path("experiment/<slug:id>/query", views.process_query, name="query"),
-    path("experiment/<slug:id>/signal", views.show_signal_page, name="signal"),
 ]
