@@ -46,7 +46,7 @@ def check_files_names_experiment(files, experiment_id):
 def check_file_extensions(files):
     correct_suffix = False
     for file in files:
-        for i in range(0, len(file_extensions) - 1):
+        for i in range(len(file_extensions)):
             if file.name.endswith(file_extensions[i]):
                 correct_suffix = True
                 break
@@ -73,7 +73,7 @@ def get_file_names(experiment_id):
     nix_files = list()
     # loop files in directory
     for file in all_files:
-        for i in range(0, len(file_extensions) - 1):
+        for i in range(len(file_extensions)):
             if file.endswith(file_extensions[i]):
                 nix_files.append(file)
                 break
