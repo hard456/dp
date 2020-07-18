@@ -3,6 +3,7 @@ import os
 import nixio as nix
 from idna import unicode
 from nix import utils
+from nix import converter
 import rdflib
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse, response
@@ -111,11 +112,12 @@ def show_metadata(request, id):
     if file_name == "" or not utils.is_file_exists(id, file_name):
         return render(request, '404.html')
 
+    file_content = unicode(utils.read_file(id, file_name), "utf-8")
     return render(request, 'nix/metadata.html', {
         'experiment_id': id,
         'transformed_files': utils.get_transformed_names(id),
         'selected_file': file_name,
-        'file_content': unicode(utils.read_file(id, file_name), "utf-8")
+        'file_content': file_content
     })
 
 
@@ -132,8 +134,13 @@ def process_query(request, id):
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
     g = Graph()
+
     try:
         result = g.parse(file_path, format="json-ld")
+    except:
+        error_message = "Invalid JSON-LD file."
+
+    try:
         query_result = g.query(query)
     except:
         error_message = "An error occurred while executing the query."
@@ -204,6 +211,8 @@ def convert_file(request, id, name):
     if not utils.is_file_exists(id, name):
         return render(request, '404.html')
 
+    content = converter.convert_metadata(id, name)
+
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'success_message': "The file has been converted.",
@@ -212,9 +221,9 @@ def convert_file(request, id, name):
     })
 
 
-def testik(request):
+def testik(request, id):
     module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/test3.nix')
+    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/experiment1.nix')
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
 
     # open nix file
@@ -230,7 +239,11 @@ def testik(request):
     #     error_message = "An error occurred while opening the NIX file."
 
     print(nix_file.format, nix_file.version, nix_file.created_at)
-    sections = nix_file.pprint()
+    nix_file.pprint()
+    sections = nix_file.sections
+    section_one = sections[0]
+    s0 = section_one[0]
+    s1 = section_one[1]
     nix_file.close()
     return render(request, 'nix/test.html')
 

@@ -1,4 +1,6 @@
 import random
+import os
+import nixio as nix
 from django.core.files.storage import FileSystemStorage
 
 fs = FileSystemStorage()
@@ -95,3 +97,10 @@ def get_transformed_names(experiment_id):
 def read_file(experiment_id, file_name):
     file = fs.open('experiments/' + experiment_id + '/' + file_name)
     return file.read()
+
+
+def open_nix_file(experiment_id, file_name):
+    module_dir = os.path.dirname(__file__)  # get current directory
+    file_path = os.path.join(module_dir, '../media/experiments/' + experiment_id + '/' + file_name)
+    nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
+    return nix_file
