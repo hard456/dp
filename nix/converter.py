@@ -1,8 +1,9 @@
 from nix import utils
-test = ""
+
+metadata = ''
 
 
-def create_context():
+def add_context():
     context = '''{
   "@context": [
   {
@@ -10,22 +11,22 @@ def create_context():
     "experimenters": "http://example.com/eeg-vocabulary#experimenters",
     "subject": "http://example.com/eeg-vocabulary#subject",
     "laterality": "http://example.com/eeg-vocabulary#laterality"
-  }],'''
+  }]'''
     print(context)
+    add_content(context)
     return context
 
 
 def convert_metadata(id, file_name):
     nix_file = utils.open_nix_file(id, file_name)
-    content = create_context()
-    get_metadata(nix_file)
-    content = content + '\n}'
-    return content
+    add_context()
+    find_metadata(nix_file)
+    close_metadata_structure()
+    return metadata
 
 
-def get_metadata(nix_file):
-    for i in range(len(nix_file.blocks)):
-        loop_block(nix_file.blocks[i])
+def find_metadata(nix_file):
+    loop_blocks(nix_file.blocks)
     for i in range(len(nix_file.sections)):
         if nix_file.sections[i].type == "nix.metadata.eeg":
             loop_metadata_eeg(nix_file.sections[i])
@@ -33,17 +34,35 @@ def get_metadata(nix_file):
             loop_metadata_session(nix_file.sections[i])
 
 
-def loop_block(block):
+def loop_blocks(blocks):
     content = '  "blocks": ['
-    content_body = '\n    {\n    "name": "' + block.name + '"'
-    for i in range(len(block.data_arrays)):
-        array = block.data_arrays[i]
-        print("array")
-    content_body += '\n    }'
-    content += content_body
+    # loop blocks
+    for i in range(len(blocks)):
+        block = blocks[i]
+        content += '\n    {\n    "name": "' + block.name + '",'
+        content += '\n    "data_arrays": ['
+        # loop data_arrays
+        for j in range(len(block.data_arrays)):
+            array = block.data_arrays[j]
+            content += '\n      {\n      "name": "' + array.name + '",'
+            content += '\n      "dimensions": ['
+            # loop dimensions
+            for k in range(len(array.data_extent)):
+                content += '\n        {\n        "size": "' + str(array.data_extent[k]) + '"'
+                # dimension = block.data_arrays[j].dimensions[0]
+                # dimension2 = block.data_arrays[j].dimensions[1]
+                content += '\n        }'
+                if k < len(array.data_extent)-1:
+                    content += ','
+            content += '\n      ]}'
+            if j < len(block.data_arrays) - 1:
+                content += ','
+        content += '\n    ]}'
+        if i < len(blocks) - 1:
+            content += ','
     content += '\n  ]'
     print(content)
-    print("test")
+    add_content(content)
 
 
 def loop_metadata_eeg(section):
@@ -59,29 +78,29 @@ def loop_metadata_session(section):
     print("session:")
     for i in range(len(section.sections)):
         if section.sections[i].name == "Experiment":
-            get_experiment(section.sections[i])
+            add_experiment(section.sections[i])
         elif section.sections[i].name == "Recording":
-            get_recording(section.sections[i])
+            add_recording(section.sections[i])
         elif section.sections[i].name == "Environment":
-            get_environment(section.sections[i])
+            add_environment(section.sections[i])
         elif section.sections[i].name == "Project":
-            get_project(section.sections[i])
+            add_project(section.sections[i])
         elif section.sections[i].name == "Subject":
-            get_subject(section.sections[i])
+            add_subject(section.sections[i])
         elif section.sections[i].name == "Weather":
-            get_weather(section.sections[i])
+            add_weather(section.sections[i])
         elif section.sections[i].name == "HardwareProperties":
-            get_hardware_properties(section.sections[i])
+            add_hardware_properties(section.sections[i])
         elif section.sections[i].name == "Electrodes":
-            get_electrodes(section.sections[i])
+            add_electrodes(section.sections[i])
         elif section.sections[i].name == "Software":
-            get_software(section.sections[i])
+            add_software(section.sections[i])
         elif section.sections[i].name == "Experimenters":
-            get_experimenters(section.sections[i])
+            add_experimenters(section.sections[i])
         print(section.sections[i].name)
 
 
-def get_experiment(section):
+def add_experiment(section):
     for i in range(len(section.props)):
         if section.props[i].name == "Private Experiment":
             print(section.props[i].values[0])
@@ -89,7 +108,7 @@ def get_experiment(section):
             print(section.props[i].values[0])
 
 
-def get_recording(section):
+def add_recording(section):
     for i in range(len(section.props)):
         if section.props[i].name == "Start":
             print(section.props[i].values[0])
@@ -99,13 +118,13 @@ def get_recording(section):
             print(section.props[i].values[0])
 
 
-def get_environment(section):
+def add_environment(section):
     for i in range(len(section.props)):
         if section.props[i].name == "RoomTemperature":
             print(section.props[i].values[0])
 
 
-def get_project(section):
+def add_project(section):
     for i in range(len(section.props)):
         if section.props[i].name == "PrincipleInvestigator":
             print(section.props[i].values[0])
@@ -115,7 +134,7 @@ def get_project(section):
             print(section.props[i].values[0])
 
 
-def get_subject(section):
+def add_subject(section):
     for i in range(len(section.props)):
         if section.props[i].name == "Gender":
             print(section.props[i].values[0])
@@ -125,7 +144,7 @@ def get_subject(section):
         #     print(section.props[i].values[0])
 
 
-def get_weather(section):
+def add_weather(section):
     for i in range(len(section.props)):
         if section.props[i].name == "Weather":
             print(section.props[i].values[0])
@@ -133,35 +152,51 @@ def get_weather(section):
             print(section.props[i].values[0])
 
 
-def get_hardware_properties(section):
+def add_hardware_properties(section):
     print("hard_properties")
 
 
-def get_electrodes(section):
+def add_electrodes(section):
     print("electrodes")
 
 
-def get_software(section):
+def add_software(section):
     print("software")
 
 
-def get_experimenters(section):
+def add_experimenters(section):
     content = '  "experimenters": ['
     for i in range(len(section.sections)):
-        content_body = '\n    {\n    "@type": "Person",'
+        content += '\n    {'
+        # content += '\n    "@type": "Person",'
         for j in range(len(section.sections[i].props)):
             if section.sections[i].props[j].name == 'Role':
-                content_body += '\n    "Role": ' + '"' + section.sections[i].props[j].values[0] + '"'
+                content += '\n    "Role": ' + '"' + section.sections[i].props[j].values[0] + '"'
             elif section.sections[i].props[j].name == 'FirstName':
-                content_body += '\n    "FirstName": ' + '"' + section.sections[i].props[j].values[0] + '"'
+                content += '\n    "FirstName": ' + '"' + section.sections[i].props[j].values[0] + '"'
             elif section.sections[i].props[j].name == 'LastName':
-                content_body += '\n    "LastName": ' + '"' + section.sections[i].props[j].values[0] + '"'
+                content += '\n    "LastName": ' + '"' + section.sections[i].props[j].values[0] + '"'
             elif section.sections[i].props[j].name == 'Gender':
-                content_body += '\n    "Gender": ' + '"' + section.sections[i].props[j].values[0] + '"'
+                content += '\n    "Gender": ' + '"' + section.sections[i].props[j].values[0] + '"'
 
             if j < len(section.sections[i].props)-1:
-                content_body += ','
-        content_body += '\n    }'
-        content += content_body
+                content += ','
+        content += '\n    }'
+        if i < len(section.sections) - 1:
+            content += ','
     content += '\n  ]'
+    add_content(content)
+
+
+def add_content(content):
+    global metadata
     print(content)
+    if len(metadata) == 0:
+        metadata += content
+    else:
+        metadata += ",\n" + content
+
+
+def close_metadata_structure():
+    global metadata
+    metadata += '\n}'

@@ -104,3 +104,8 @@ def open_nix_file(experiment_id, file_name):
     file_path = os.path.join(module_dir, '../media/experiments/' + experiment_id + '/' + file_name)
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
     return nix_file
+
+
+def create_json_ld_file (experiment_id, file_name, content):
+    file = fs.open('experiments/' + experiment_id + '/' + file_name, 'w')
+    file.write(content)

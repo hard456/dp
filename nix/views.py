@@ -208,14 +208,20 @@ def convert_all(request, id):
 
 
 def convert_file(request, id, name):
+    success_message = ""
+
     if not utils.is_file_exists(id, name):
         return render(request, '404.html')
 
-    content = converter.convert_metadata(id, name)
+    new_name = name.split('.')[0]+'.jsonld'
+
+    if not utils.is_file_exists(id, new_name):
+        content = converter.convert_metadata(id, name)
+        utils.create_json_ld_file(id, new_name, content)
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
-        'success_message': "The file has been converted.",
+        'success_message': "The requested experiment is converted.",
         'transformed_files': utils.get_transformed_names(id),
         'files': utils.get_file_names(id)
     })
