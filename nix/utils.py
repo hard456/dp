@@ -109,3 +109,7 @@ def open_nix_file(experiment_id, file_name):
 def create_json_ld_file (experiment_id, file_name, content):
     file = fs.open('experiments/' + experiment_id + '/' + file_name, 'w')
     file.write(content)
+
+
+def first_character_lower_case(text):
+    return text[0].lower() + text[1:]

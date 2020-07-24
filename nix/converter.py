@@ -7,18 +7,16 @@ def add_context():
     context = '''{
   "@context": [
   {
-    "detailedDescription": "http://example.com/eeg-vocabulary#detailedDescription",
-    "experimenters": "http://example.com/eeg-vocabulary#experimenters",
-    "subject": "http://example.com/eeg-vocabulary#subject",
-    "laterality": "http://example.com/eeg-vocabulary#laterality"
+    "@vocab": "http://example.com/eeg/"
   }]'''
-    print(context)
     add_content(context)
     return context
 
 
 def convert_metadata(id, file_name):
     nix_file = utils.open_nix_file(id, file_name)
+    global metadata
+    metadata = ""
     add_context()
     find_metadata(nix_file)
     close_metadata_structure()
@@ -72,6 +70,13 @@ def loop_metadata_eeg(section):
     #         get_experimenters(section.sections[i])
     #     elif section.sections[i].name == "Recording":
     #         get_experimenters(section.sections[i])
+
+
+def loop_metadata_session_all(section):
+    sections = section.sections
+    for i in range(len(sections)):
+        if hasattr(sections, 'sections'):
+            content = '  "' + utils.first_character_lower_case(section[i].name) + '": ['
 
 
 def loop_metadata_session(section):
@@ -157,7 +162,20 @@ def add_hardware_properties(section):
 
 
 def add_electrodes(section):
-    print("electrodes")
+    content = '  "electrodes": ['
+    for i in range(len(section.sections)):
+        content += '\n    {'
+        for j in range(len(section.sections[i].props)):
+            name = utils.first_character_lower_case(section.sections[i].props[j].name)
+            value = section.sections[i].props[j].values[0]
+            content += '\n    "' + name + '": ' + '"' + value.replace('"', '') + '"'
+            if j < len(section.sections[i].props)-1:
+                content += ','
+        content += '\n    }'
+        if i < len(section.sections) - 1:
+            content += ','
+    content += '\n  ]'
+    add_content(content)
 
 
 def add_software(section):
@@ -170,15 +188,9 @@ def add_experimenters(section):
         content += '\n    {'
         # content += '\n    "@type": "Person",'
         for j in range(len(section.sections[i].props)):
-            if section.sections[i].props[j].name == 'Role':
-                content += '\n    "Role": ' + '"' + section.sections[i].props[j].values[0] + '"'
-            elif section.sections[i].props[j].name == 'FirstName':
-                content += '\n    "FirstName": ' + '"' + section.sections[i].props[j].values[0] + '"'
-            elif section.sections[i].props[j].name == 'LastName':
-                content += '\n    "LastName": ' + '"' + section.sections[i].props[j].values[0] + '"'
-            elif section.sections[i].props[j].name == 'Gender':
-                content += '\n    "Gender": ' + '"' + section.sections[i].props[j].values[0] + '"'
-
+            name = utils.first_character_lower_case(section.sections[i].props[j].name)
+            value = section.sections[i].props[j].values[0]
+            content += '\n    "' + name + '": ' + '"' + value.replace('"', '') + '"'
             if j < len(section.sections[i].props)-1:
                 content += ','
         content += '\n    }'

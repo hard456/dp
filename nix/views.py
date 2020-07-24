@@ -229,7 +229,7 @@ def convert_file(request, id, name):
 
 def testik(request, id):
     module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/experiment1.nix')
+    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/test5.nix')
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
 
     # open nix file
