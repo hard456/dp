@@ -1,0 +1,5 @@
+django==3.0.7
+nixio==1.4.9
+SPARQLWrapper==1.8.5
+requests==2.24.0
+git+https://github.com/rdflib/rdflib
