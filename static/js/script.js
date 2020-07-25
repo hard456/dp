@@ -21,3 +21,7 @@ function submitUploadFiles() {
         $('#uploadFilesButton').prop('disabled', true);
         $("#uploadFilesForm").submit();
 }
+
+function showModalWindow() {
+        $('#spinnerModal').modal('show');
+}

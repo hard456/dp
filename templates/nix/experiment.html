@@ -31,11 +31,10 @@
             {% if files %}
                 <hr>
                 <h4 class="h4-v2 mr-2 mb-4">Files</h4>
-                <form method="post" action="{% url 'convert_all' id=experiment_id %}">
+                <form method="post" action="{% url 'convert_all' id=experiment_id %}" onsubmit="showModalWindow()">
                     {% csrf_token %}
                     <input type="submit" onclick="return confirm('Do you want to convert all files?')"
-                           class="btn-sm btn-danger center" value="Convert All" data-toggle="modal"
-                           data-target="#spinnerModal"/>
+                           class="btn-sm btn-danger center" value="Convert All" />
                 </form>
                 <table class="table bg-white">
                     <thead>
@@ -50,11 +49,10 @@
                         <tr>
                             <td>{{ file }}</td>
                             <td class="text">
-                                <form method="post" action="{% url 'convert_file' id=experiment_id name=file %}">
+                                <form method="post" action="{% url 'convert_file' id=experiment_id name=file %}" onsubmit="showModalWindow()">
                                     {% csrf_token %}
                                     <input type="submit" onclick="return confirm('Do you want to convert this file?')"
-                                           class="btn-sm btn-success center" value="Convert" data-toggle="modal"
-                                           data-target="#spinnerModal"/>
+                                           class="btn-sm btn-success center" value="Convert"/>
                                 </form>
                             </td>
                             <td class="text-right">
