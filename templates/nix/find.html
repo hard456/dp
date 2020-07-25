@@ -22,7 +22,7 @@
                         {% if query %}
                             <textarea class="form-control" name="query" rows="5">{{ query }}</textarea>
                         {% else %}
-                            <textarea class="form-control" name="query" rows="5">PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;&#013SELECT ?subject ?object&#013WHERE {?subject foaf:name ?object}</textarea>
+                            <textarea class="form-control" name="query" rows="5">SELECT ?subject ?predicate ?object&#013WHERE {?subject ?predicate ?object}</textarea>
                         {% endif %}
                         <label class="mt-2">Select JSON-LD file:</label>
                         <select class="form-control" name="transformed_file">
