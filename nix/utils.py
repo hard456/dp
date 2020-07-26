@@ -111,5 +111,7 @@ def create_json_ld_file (experiment_id, file_name, content):
     file.write(content)
 
 
-def first_character_lower_case(text):
-    return text[0].lower() + text[1:]
+def edit_string(text):
+    text = text[0].lower() + text[1:]
+    text = text.replace(" ", "")
+    return text
