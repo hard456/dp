@@ -196,32 +196,51 @@ def upload_files(request, id):
 
 
 def convert_all(request, id):
+    error_message = ""
+    success_message = ""
     if not utils.is_experiment_exists(id):
         return render(request, '404.html')
 
+    files = utils.get_file_names(id)
+
+    for i in range(len(files)):
+        new_name = files[i].split('.')[0] + '.jsonld'
+        try:
+            content = converter.convert_metadata(id, files[i])
+            utils.create_json_ld_file(id, new_name, content)
+            success_message = "All files have been converted."
+        except:
+            error_message = "An error occurred while converting the file named " + files[i] + "."
+
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
-        'success_message': "All files have been converted.",
+        'error_message': error_message,
+        'success_message': success_message,
         'transformed_files': utils.get_transformed_names(id),
         'files': utils.get_file_names(id)
     })
 
 
 def convert_file(request, id, name):
+    error_message = ""
     success_message = ""
-
     if not utils.is_file_exists(id, name):
         return render(request, '404.html')
 
     new_name = name.split('.')[0]+'.jsonld'
-
     if not utils.is_file_exists(id, new_name):
-        content = converter.convert_metadata(id, name)
-        utils.create_json_ld_file(id, new_name, content)
+
+        try:
+            content = converter.convert_metadata(id, name)
+            utils.create_json_ld_file(id, new_name, content)
+            success_message = "The requested experiment has been converted."
+        except:
+            error_message = "An error occurred while converting the file."
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
-        'success_message': "The requested experiment is converted.",
+        'error_message': error_message,
+        'success_message': success_message,
         'transformed_files': utils.get_transformed_names(id),
         'files': utils.get_file_names(id)
     })
