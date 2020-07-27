@@ -181,7 +181,12 @@ def parse_props(props, iteration):
     gap = " " * iteration * 2
     for i in range(len(props)):
         name = utils.edit_string(props[i].name)
-        value = str(props[i].values[0])
+        value = ""
+        for j in range(len(props[i].values)):
+            if j < len(props[i].values) - 1:
+                value += str(props[i].values[j]) + ', '
+            else:
+                value += str(props[i].values[j])
         value = value.replace('"', '')
         content += '\n' + gap + '"' + name + '": ' + '"' + value + '"'
         if i < len(props) - 1:
