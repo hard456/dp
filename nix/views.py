@@ -228,14 +228,12 @@ def convert_file(request, id, name):
         return render(request, '404.html')
 
     new_name = name.split('.')[0]+'.jsonld'
-    if not utils.is_file_exists(id, new_name):
-
-        try:
-            content = converter.convert_metadata(id, name)
-            utils.create_json_ld_file(id, new_name, content)
-            success_message = "The requested experiment has been converted."
-        except:
-            error_message = "An error occurred while converting the file."
+    try:
+        content = converter.convert_metadata(id, name)
+        utils.create_json_ld_file(id, new_name, content)
+        success_message = "The requested experiment has been converted."
+    except:
+        error_message = "An error occurred while converting the file."
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
