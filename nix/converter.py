@@ -23,9 +23,9 @@ def convert_metadata(id, file_name):
 
 
 def parse_metadata(nix_file):
-    if len(nix_file.blocks) > 0:
+    if nix_file.blocks is not None:
         parse_blocks(nix_file.blocks)
-    if len(nix_file.sections) > 0:
+    if nix_file.sections is not None:
         for i in range(len(nix_file.sections)):
             content = recursive_section_search(nix_file.sections[i], 1)
             add_content(content)
