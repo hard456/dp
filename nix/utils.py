@@ -10,13 +10,12 @@ file_extensions = ['.nix', '.h5']
 def generate_experiment_id():
     while True:
         experiment_id = str(random.randint(10000, 99999))
-        if not fs.exists('experiments/' + experiment_id + '/'):
+        if not experiment_exists(experiment_id):
             break
-
     return experiment_id
 
 
-def is_file_exists(experiment_id, file_name):
+def file_exists(experiment_id, file_name):
     if fs.exists('experiments/' + experiment_id + '/' + file_name):
         return True
     return False
@@ -30,14 +29,13 @@ def check_unique_file_names(files):
         for j in range(i + 1, len(files) - 1):
             if files[i].name.lower() == files[j].name.lower():
                 return False
-
     return True
 
 
 def check_files_names_experiment(files, experiment_id):
     if not check_unique_file_names(files):
         return False
-    experiment_files = get_file_names(experiment_id)
+    experiment_files = get_nix_files(experiment_id)
     for file in files:
         for experiment_file in experiment_files:
             if file.name.lower() == experiment_file:
@@ -54,7 +52,6 @@ def check_file_extensions(files):
                 break
         if not correct_suffix:
             return False
-
         correct_suffix = False
     return True
 
@@ -64,13 +61,13 @@ def save_files(files, experiment_id):
         fs.save('experiments/' + experiment_id + '/' + file.name.lower(), file)
 
 
-def is_experiment_exists(experiment_id):
-    if not fs.exists('experiments/' + experiment_id + '/'):
-        return False
-    return True
+def experiment_exists(experiment_id):
+    if fs.exists('experiments/' + experiment_id + '/'):
+        return True
+    return False
 
 
-def get_file_names(experiment_id):
+def get_nix_files(experiment_id):
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     nix_files = list()
     # loop files in directory
@@ -83,7 +80,7 @@ def get_file_names(experiment_id):
     return nix_files
 
 
-def get_transformed_names(experiment_id):
+def get_json_ld_files(experiment_id):
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     json_ld_files = list()
     # loop files in directory
@@ -100,8 +97,8 @@ def read_file(experiment_id, file_name):
 
 
 def open_nix_file(experiment_id, file_name):
-    module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/' + experiment_id + '/' + file_name)
+    directory = os.path.dirname(__file__)  # get current directory
+    file_path = os.path.join(directory, '../media/experiments/' + experiment_id + '/' + file_name)
     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
     return nix_file
 

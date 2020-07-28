@@ -10,7 +10,6 @@ def add_context():
     "@vocab": "http://example.com/eeg/"
   }]'''
     add_content(context)
-    return context
 
 
 def convert_metadata(id, file_name):
@@ -24,12 +23,10 @@ def convert_metadata(id, file_name):
 
 
 def parse_metadata(nix_file):
-    parse_blocks(nix_file.blocks)
-    for i in range(len(nix_file.sections)):
-        if nix_file.sections[i].type == "nix.metadata.session":
-            content = recursive_section_search(nix_file.sections[i], 1)
-            add_content(content)
-        else:
+    if len(nix_file.blocks) > 0:
+        parse_blocks(nix_file.blocks)
+    if len(nix_file.sections) > 0:
+        for i in range(len(nix_file.sections)):
             content = recursive_section_search(nix_file.sections[i], 1)
             add_content(content)
 
