@@ -116,4 +116,5 @@ def edit_name(text):
         if (i > 0) and (i < len(text)-1) and (text[i-1] == " "):
             text = text[:i-1] + text[i].upper() + text[i+1:]
     text = text.replace(" ", "")
+    text = text.replace(".", "")
     return text
