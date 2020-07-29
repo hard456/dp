@@ -39,7 +39,7 @@ def parse_blocks(blocks):
             block = blocks[i]
             content += '\n    {\n    "name": "' + block.name + '"'
             if block.metadata is not None:
-                name = utils.edit_string(block.metadata.name)
+                name = utils.edit_name(block.metadata.name)
                 content += ',\n    "metadataLinkTo": "' + name + '"'
             # parse groups
             if len(block.groups) > 0:
@@ -70,7 +70,7 @@ def parse_groups(groups):
         group = groups[i]
         content += '\n      {\n      "name": "' + group.name + '"'
         if group.metadata is not None:
-            name = utils.edit_string(group.metadata.name)
+            name = utils.edit_name(group.metadata.name)
             content += ',\n      "metadataLinkTo": "' + name + '"'
         # data arrays links
         if len(group.data_arrays) > 0:
@@ -120,7 +120,7 @@ def parse_data_arrays(data_arrays):
         content += '\n      {\n      "name": "' + array.name + '",'
         content += '\n      "type": "' + array.type + '",'
         if array.metadata is not None:
-            name = utils.edit_string(array.metadata.name)
+            name = utils.edit_name(array.metadata.name)
             content += '\n      "metadataLinkTo": "' + name + '",'
         # loop dimensions
         if len(array.dimensions) > 0:
@@ -150,7 +150,7 @@ def recursive_section_search(section, iteration):
     content = ""
     gap = " " * iteration * 2
     if hasattr(section, 'name'):
-        name = utils.edit_string(section.name)
+        name = utils.edit_name(section.name)
         content += gap + '"' + name + '": {'
         if hasattr(section, 'props') and section.props:
             iteration += 1
@@ -177,7 +177,7 @@ def parse_props(props, iteration):
     content = ""
     gap = " " * iteration * 2
     for i in range(len(props)):
-        name = utils.edit_string(props[i].name)
+        name = utils.edit_name(props[i].name)
         value = ""
         for j in range(len(props[i].values)):
             if j < len(props[i].values) - 1:
@@ -194,7 +194,6 @@ def parse_props(props, iteration):
 
 def add_content(content):
     global metadata
-    print(content)
     if len(metadata) == 0:
         metadata += content
     else:

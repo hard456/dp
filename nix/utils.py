@@ -108,7 +108,12 @@ def create_json_ld_file (experiment_id, file_name, content):
     file.write(content)
 
 
-def edit_string(text):
-    text = text[0].lower() + text[1:]
+def edit_name(text):
+    if len(text) > 0:
+        if text[1].islower():
+            text = text[0].lower() + text[1:]
+    for i in range(len(text)):
+        if (i > 0) and (i < len(text)-1) and (text[i-1] == " "):
+            text = text[:i-1] + text[i].upper() + text[i+1:]
     text = text.replace(" ", "")
     return text
