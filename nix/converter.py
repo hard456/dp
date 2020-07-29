@@ -184,7 +184,8 @@ def parse_props(props, iteration):
                 value += str(props[i].values[j]) + ', '
             else:
                 value += str(props[i].values[j])
-        value = value.replace('"', '')
+        value = value.replace('\"', '')
+        value = value.replace('\n', ' ')
         content += '\n' + gap + '"' + name + '": ' + '"' + value + '"'
         if i < len(props) - 1:
             content += ','
