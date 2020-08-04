@@ -13,10 +13,13 @@ from rdflib import Graph
 import requests
 
 
+# displays the main page of the application
 def show_home_page(request):
     return render(request, 'nix/upload_experiment.html')
 
 
+# displays the experiment management page
+# id - experiment id
 def show_experiment_page(request, id):
     if not utils.experiment_exists(id):
         return render(request, '404.html')
@@ -28,6 +31,9 @@ def show_experiment_page(request, id):
     })
 
 
+# downloads the selected file
+# id - experiment id
+# name - file name
 def download_file(request, id, name):
     fs = FileSystemStorage()
     if not utils.file_exists(id, name):
@@ -36,6 +42,9 @@ def download_file(request, id, name):
     return FileResponse(fs.open('experiments/' + id + '/' + name, 'rb'), content_type='application/force-download')
 
 
+# deletes the selected file
+# id - experiment id
+# name - file name
 def delete_file(request, id, name):
     fs = FileSystemStorage()
     if not utils.file_exists(id, name):
@@ -59,6 +68,8 @@ def delete_file(request, id, name):
     })
 
 
+# displays the experiment metadata page
+# id - experiment id
 def show_metadata_page(request, id):
     if not utils.experiment_exists(id):
         return render(request, '404.html')
@@ -69,6 +80,8 @@ def show_metadata_page(request, id):
     })
 
 
+# displays the experiment metadata search page
+# id - experiment id
 def show_find_page(request, id):
     if not utils.experiment_exists(id):
         return render(request, '404.html')
@@ -79,10 +92,11 @@ def show_find_page(request, id):
     })
 
 
+# creates an experiment and uploads files
 def upload_experiment(request):
     if request.FILES.getlist('upload_files', True):
         files = request.FILES.getlist('upload_files')
-
+        file = files[0]
         # checks unique file names
         if not utils.check_unique_file_names(files):
             return render(request, 'nix/upload_experiment.html', {
@@ -106,6 +120,8 @@ def upload_experiment(request):
     })
 
 
+# shows the converted metadata of the experiment
+# id - experiment id
 def show_metadata(request, id):
     file_name = request.POST.get("transformed_file", "")
 
@@ -121,6 +137,8 @@ def show_metadata(request, id):
     })
 
 
+# processes the SPARQL query
+# id - experiment id
 def process_query(request, id):
     error_message = ""
     query_result = ""
@@ -155,6 +173,8 @@ def process_query(request, id):
     })
 
 
+# adds files to the experiment
+# id - experiment id
 def upload_files(request, id):
     if not utils.experiment_exists(id):
         return render(request, '404.html')
@@ -195,6 +215,8 @@ def upload_files(request, id):
     })
 
 
+# converts metadata for all experiments for the selected experiment.
+# id - experiment id
 def convert_all(request, id):
     error_message = ""
     success_message = ""
@@ -221,6 +243,9 @@ def convert_all(request, id):
     })
 
 
+# converts metadata for the selected NIX file
+# id - experiment id
+# name - file name
 def convert_file(request, id, name):
     error_message = ""
     success_message = ""
@@ -244,48 +269,25 @@ def convert_file(request, id, name):
     })
 
 
-def testik(request, id):
-    module_dir = os.path.dirname(__file__)  # get current directory
-    file_path = os.path.join(module_dir, '../media/experiments/' + id + '/test5.nix')
-    nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
-
-    # open nix file
-    # module_dir = os.path.dirname(__file__)  # get current directory
-    # file_path = os.path.join(module_dir, '../media/experiments/' + id + '/' + file_name)
-    #
-    # try:
-    #     nix_file = nix.File.open(file_path, nix.FileMode.ReadOnly)
-    #     file_format = nix_file.format
-    #     version = nix_file.version
-    #     nix.File.close(nix_file)
-    # except:
-    #     error_message = "An error occurred while opening the NIX file."
-
-    print(nix_file.format, nix_file.version, nix_file.created_at)
-    nix_file.pprint()
-    sections = nix_file.sections
-    section_one = sections[0]
-    s0 = section_one[0]
-    s1 = section_one[1]
-    nix_file.close()
-    return render(request, 'nix/test.html')
-
-
+# HTTP 404 page
 def error_404(request, exception):
     data = {}
     return render(request, '404.html', data)
 
 
+# HTTP 500 page
 def error_500(request):
     data = {}
     return render(request, '500.html', data)
 
 
+# HTTP 403 page
 def error_403(request, exception):
     data = {}
     return render(request, '403.html', data)
 
 
+# HTTP 404 page
 def error_400(request, exception):
     data = {}
     return render(request, '400.html', data)

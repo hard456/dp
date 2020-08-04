@@ -17,9 +17,9 @@
                     <form id="uploadExperimentForm" action="{% url 'upload_experiment' %}" method="post"
                           enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input type="file" class="form-control-file bg-secondary text-white border" name="upload_files"
+                        <input type="file" id="files" class="form-control-file bg-secondary text-white border" name="upload_files"
                                accept=".nix,.h5" multiple>
-                        <button id="uploadExperimentButton" class="btn btn-primary float-right mt-3"
+                        <button type="button" id="uploadExperimentButton" class="btn btn-primary float-right mt-3"
                                 onclick="submitUploadExperiment()">Upload
                         </button>
                     </form>

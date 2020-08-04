@@ -1,7 +1,18 @@
 function submitUploadExperiment() {
-        $('#spinner').css({'display': 'block'});
-        $('#uploadExperimentButton').prop('disabled', true);
-        $("#uploadExperimentForm").submit();
+        upload = document.getElementById('files');
+        size = 0;
+        for (i = 0; i < upload.files.length; i++) {
+                size += upload.files[i].size;
+        }
+        if(size > 2147483648){
+                alert("Size of files is: " + size + "\nThe maximum size allowed is: 2147483648")
+        }
+        else{
+           $('#spinner').css({'display': 'block'});
+           $('#uploadExperimentButton').prop('disabled', true);
+           $("#uploadExperimentForm").submit();
+        }
+
 }
 
 function submitFindMetadata() {

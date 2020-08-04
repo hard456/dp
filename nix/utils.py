@@ -7,6 +7,7 @@ fs = FileSystemStorage()
 file_extensions = ['.nix', '.h5']
 
 
+# generates an experiment identifier
 def generate_experiment_id():
     while True:
         experiment_id = str(random.randint(10000, 99999))
@@ -15,12 +16,14 @@ def generate_experiment_id():
     return experiment_id
 
 
+# checks the existence of the file
 def file_exists(experiment_id, file_name):
     if fs.exists('experiments/' + experiment_id + '/' + file_name):
         return True
     return False
 
 
+# checks unique file names
 def check_unique_file_names(files):
     if len(files) == 1:
         return True
@@ -32,6 +35,7 @@ def check_unique_file_names(files):
     return True
 
 
+# checks unique file names for an existing experiment
 def check_files_names_experiment(files, experiment_id):
     if not check_unique_file_names(files):
         return False
@@ -43,6 +47,7 @@ def check_files_names_experiment(files, experiment_id):
     return True
 
 
+# checks file extensions
 def check_file_extensions(files):
     correct_suffix = False
     for file in files:
@@ -56,17 +61,20 @@ def check_file_extensions(files):
     return True
 
 
+# saves experiment files
 def save_files(files, experiment_id):
     for file in files:
         fs.save('experiments/' + experiment_id + '/' + file.name.lower(), file)
 
 
+# returns true if the experiment exists
 def experiment_exists(experiment_id):
     if fs.exists('experiments/' + experiment_id + '/'):
         return True
     return False
 
 
+# returns the NIX file names for the selected experiment
 def get_nix_files(experiment_id):
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     nix_files = list()
@@ -80,6 +88,7 @@ def get_nix_files(experiment_id):
     return nix_files
 
 
+# returns the json-ld file names for the selected experiment
 def get_json_ld_files(experiment_id):
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     json_ld_files = list()
@@ -91,11 +100,13 @@ def get_json_ld_files(experiment_id):
     return json_ld_files
 
 
+# returns the contents of the file
 def read_file(experiment_id, file_name):
     file = fs.open('experiments/' + experiment_id + '/' + file_name)
     return file.read()
 
 
+# returns an open nix file
 def open_nix_file(experiment_id, file_name):
     directory = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(directory, '../media/experiments/' + experiment_id + '/' + file_name)
@@ -103,11 +114,13 @@ def open_nix_file(experiment_id, file_name):
     return nix_file
 
 
+# creates a json-ld file and writes the contents to it
 def create_json_ld_file (experiment_id, file_name, content):
     file = fs.open('experiments/' + experiment_id + '/' + file_name, 'w')
     file.write(content)
 
 
+# returns the modified name for writing in json-ld format
 def edit_name(text):
     if len(text) > 0:
         if text[1].islower():
