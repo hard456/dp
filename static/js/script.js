@@ -47,7 +47,7 @@ function submitUploadFiles() {
         }
 }
 
-//displays a modal window
+//displays the modal window
 function showModalWindow() {
         $('#spinnerModal').modal('show');
 }
