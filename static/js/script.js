@@ -5,7 +5,7 @@ function submitUploadExperiment() {
                 size += upload.files[i].size;
         }
         if(size > 2147483648){
-                alert("Size of files is: " + size + "\nThe maximum size allowed is: 2147483648")
+                alert("Total size exceeded 2 GiB.")
         }
         else{
            $('#spinner').css({'display': 'block'});
