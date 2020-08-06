@@ -219,7 +219,7 @@ def upload_files(request, id):
 # id - experiment id
 def convert_all(request, id):
     error_message = ""
-    success_message = ""
+    success_message = "All files have been converted."
     if not utils.experiment_exists(id):
         return render(request, '404.html')
 
@@ -227,12 +227,14 @@ def convert_all(request, id):
 
     for i in range(len(files)):
         new_name = files[i].split('.')[0] + '.jsonld'
-        try:
-            content = converter.convert_metadata(id, files[i])
-            utils.create_json_ld_file(id, new_name, content)
-            success_message = "All files have been converted."
-        except:
-            error_message = "An error occurred while converting the file named " + files[i] + "."
+        if not utils.file_exists(id, new_name):
+            try:
+                content = converter.convert_metadata(id, files[i])
+                utils.create_json_ld_file(id, new_name, content)
+            except:
+                success_message = ""
+                error_message = "An error occurred while converting the file named " + files[i] + "."
+                break
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
@@ -248,17 +250,18 @@ def convert_all(request, id):
 # name - file name
 def convert_file(request, id, name):
     error_message = ""
-    success_message = ""
+    success_message = "The requested experiment has been converted."
     if not utils.file_exists(id, name):
         return render(request, '404.html')
 
-    new_name = name.split('.')[0]+'.jsonld'
-    try:
-        content = converter.convert_metadata(id, name)
-        utils.create_json_ld_file(id, new_name, content)
-        success_message = "The requested experiment has been converted."
-    except:
-        error_message = "An error occurred while converting the file."
+    new_name = name.split('.')[0] + '.jsonld'
+    if not utils.file_exists(id, new_name):
+        try:
+            content = converter.convert_metadata(id, name)
+            utils.create_json_ld_file(id, new_name, content)
+        except:
+            error_message = "An error occurred while converting the file."
+            success_message = ""
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
