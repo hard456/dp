@@ -2,8 +2,7 @@ import os
 
 import nixio as nix
 from idna import unicode
-from nix import utils
-from nix import converter
+from nix import experiment
 import rdflib
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse, response
@@ -21,13 +20,13 @@ def show_home_page(request):
 # displays the experiment management page
 # id - experiment id
 def show_experiment_page(request, id):
-    if not utils.experiment_exists(id):
+    if not experiment.experiment_exists(id):
         return render(request, '404.html')
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
-        'transformed_files': utils.get_json_ld_files(id),
-        'files': utils.get_nix_files(id)
+        'transformed_files': experiment.get_json_ld_files(id),
+        'files': experiment.get_nix_files(id)
     })
 
 
@@ -36,7 +35,7 @@ def show_experiment_page(request, id):
 # name - file name
 def download_file(request, id, name):
     fs = FileSystemStorage()
-    if not utils.file_exists(id, name):
+    if not experiment.file_exists(id, name):
         return render(request, '404.html')
 
     return FileResponse(fs.open('experiments/' + id + '/' + name, 'rb'), content_type='application/force-download')
@@ -47,7 +46,7 @@ def download_file(request, id, name):
 # name - file name
 def delete_file(request, id, name):
     fs = FileSystemStorage()
-    if not utils.file_exists(id, name):
+    if not experiment.file_exists(id, name):
         return render(request, '404.html')
 
     try:
@@ -56,26 +55,26 @@ def delete_file(request, id, name):
         return render(request, 'nix/experiment.html', {
             'experiment_id': id,
             'error_message': "The file was not deleted.",
-            'transformed_files': utils.get_json_ld_files(id),
-            'files': utils.get_nix_files(id)
+            'transformed_files': experiment.get_json_ld_files(id),
+            'files': experiment.get_nix_files(id)
         })
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'success_message': "The file was deleted.",
-        'transformed_files': utils.get_json_ld_files(id),
-        'files': utils.get_nix_files(id)
+        'transformed_files': experiment.get_json_ld_files(id),
+        'files': experiment.get_nix_files(id)
     })
 
 
 # displays the experiment metadata page
 # id - experiment id
 def show_metadata_page(request, id):
-    if not utils.experiment_exists(id):
+    if not experiment.experiment_exists(id):
         return render(request, '404.html')
 
     return render(request, 'nix/metadata.html', {
-        'transformed_files': utils.get_json_ld_files(id),
+        'transformed_files': experiment.get_json_ld_files(id),
         'experiment_id': id
     })
 
@@ -83,12 +82,12 @@ def show_metadata_page(request, id):
 # displays the experiment metadata search page
 # id - experiment id
 def show_find_page(request, id):
-    if not utils.experiment_exists(id):
+    if not experiment.experiment_exists(id):
         return render(request, '404.html')
 
     return render(request, 'nix/find.html', {
         'experiment_id': id,
-        'transformed_files': utils.get_json_ld_files(id)
+        'transformed_files': experiment.get_json_ld_files(id)
     })
 
 
@@ -98,21 +97,21 @@ def upload_experiment(request):
         files = request.FILES.getlist('upload_files')
         file = files[0]
         # checks unique file names
-        if not utils.check_unique_file_names(files):
+        if not experiment.check_unique_file_names(files):
             return render(request, 'nix/upload_experiment.html', {
                 'error_message': "The files do not have a unique name."
             })
 
         # checks file extensions
-        if not utils.check_file_extensions(files):
+        if not experiment.check_file_extensions(files):
             return render(request, 'nix/upload_experiment.html', {
                 'error_message': "The file can only have a .nix or .h5 extension."
             })
 
         # generates unique experiment id
-        experiment_id = utils.generate_experiment_id()
+        experiment_id = experiment.generate_experiment_id()
 
-        utils.save_files(files, experiment_id)
+        experiment.save_files(files, experiment_id)
         return redirect('/experiment/' + experiment_id + '/files')
 
     return render(request, 'nix/upload_experiment.html', {
@@ -125,13 +124,13 @@ def upload_experiment(request):
 def show_metadata(request, id):
     file_name = request.POST.get("transformed_file", "")
 
-    if file_name == "" or not utils.file_exists(id, file_name):
+    if file_name == "" or not experiment.file_exists(id, file_name):
         return render(request, '404.html')
 
-    file_content = unicode(utils.read_file(id, file_name), "utf-8")
+    file_content = unicode(experiment.read_file(id, file_name), "utf-8")
     return render(request, 'nix/metadata.html', {
         'experiment_id': id,
-        'transformed_files': utils.get_json_ld_files(id),
+        'transformed_files': experiment.get_json_ld_files(id),
         'selected_file': file_name,
         'file_content': file_content
     })
@@ -144,7 +143,7 @@ def process_query(request, id):
     query_result = ""
 
     file_name = request.POST.get("transformed_file", "")
-    if file_name == "" or not utils.file_exists(id, file_name):
+    if file_name == "" or not experiment.file_exists(id, file_name):
         return render(request, '404.html')
 
     query = request.POST.get("query", "")
@@ -168,7 +167,7 @@ def process_query(request, id):
         'query': query,
         'experiment_id': id,
         'query_result': query_result,
-        'transformed_files': utils.get_json_ld_files(id),
+        'transformed_files': experiment.get_json_ld_files(id),
         'selected_file': file_name
     })
 
@@ -176,42 +175,42 @@ def process_query(request, id):
 # adds files to the experiment
 # id - experiment id
 def upload_files(request, id):
-    if not utils.experiment_exists(id):
+    if not experiment.experiment_exists(id):
         return render(request, '404.html')
 
     if request.FILES.getlist('upload_files', False):
         files = request.FILES.getlist('upload_files')
 
         # checks file extensions
-        if not utils.check_file_extensions(files):
+        if not experiment.check_file_extensions(files):
             return render(request, 'nix/experiment.html', {
                 'experiment_id': id,
                 'error_message': "The file can only have a .nix or .h5 extension.",
-                'transformed_files': utils.get_json_ld_files(id),
-                'files': utils.get_nix_files(id)
+                'transformed_files': experiment.get_json_ld_files(id),
+                'files': experiment.get_nix_files(id)
             })
 
         # checks unique file names
-        if not utils.check_files_names_experiment(files, id):
+        if not experiment.check_files_names_experiment(files, id):
             return render(request, 'nix/experiment.html', {
                 'experiment_id': id,
                 'error_message': "Files do not contain unique names.",
-                'transformed_files': utils.get_json_ld_files(id),
-                'files': utils.get_nix_files(id)
+                'transformed_files': experiment.get_json_ld_files(id),
+                'files': experiment.get_nix_files(id)
             })
 
-        utils.save_files(files, id)
+        experiment.save_files(files, id)
         return render(request, 'nix/experiment.html', {
             'experiment_id': id,
             'success_message': "File upload successful.",
-            'transformed_files': utils.get_json_ld_files(id),
-            'files': utils.get_nix_files(id)
+            'transformed_files': experiment.get_json_ld_files(id),
+            'files': experiment.get_nix_files(id)
         })
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': "No file selected.",
-        'transformed_files': utils.get_json_ld_files(id),
-        'files': utils.get_nix_files(id)
+        'transformed_files': experiment.get_json_ld_files(id),
+        'files': experiment.get_nix_files(id)
     })
 
 
@@ -220,28 +219,23 @@ def upload_files(request, id):
 def convert_all(request, id):
     error_message = ""
     success_message = "All files have been converted."
-    if not utils.experiment_exists(id):
+    if not experiment.experiment_exists(id):
         return render(request, '404.html')
 
-    files = utils.get_nix_files(id)
+    files = experiment.get_nix_files(id)
 
     for i in range(len(files)):
-        new_name = files[i].split('.')[0] + '.jsonld'
-        if not utils.file_exists(id, new_name):
-            try:
-                content = converter.convert_metadata(id, files[i])
-                utils.create_json_ld_file(id, new_name, content)
-            except:
-                success_message = ""
-                error_message = "An error occurred while converting the file named " + files[i] + "."
-                break
+        if not experiment.convert_metadata(id, files[i]):
+            success_message = ""
+            error_message = "An error occurred while converting the file named " + files[i] + "."
+            break
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': error_message,
         'success_message': success_message,
-        'transformed_files': utils.get_json_ld_files(id),
-        'files': utils.get_nix_files(id)
+        'transformed_files': experiment.get_json_ld_files(id),
+        'files': experiment.get_nix_files(id)
     })
 
 
@@ -251,24 +245,19 @@ def convert_all(request, id):
 def convert_file(request, id, name):
     error_message = ""
     success_message = "The requested experiment has been converted."
-    if not utils.file_exists(id, name):
+    if not experiment.file_exists(id, name):
         return render(request, '404.html')
 
-    new_name = name.split('.')[0] + '.jsonld'
-    if not utils.file_exists(id, new_name):
-        try:
-            content = converter.convert_metadata(id, name)
-            utils.create_json_ld_file(id, new_name, content)
-        except:
-            error_message = "An error occurred while converting the file."
-            success_message = ""
+    if not experiment.convert_metadata(id, name):
+        error_message = "An error occurred while converting the file."
+        success_message = ""
 
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': error_message,
         'success_message': success_message,
-        'transformed_files': utils.get_json_ld_files(id),
-        'files': utils.get_nix_files(id)
+        'transformed_files': experiment.get_json_ld_files(id),
+        'files': experiment.get_nix_files(id)
     })
 
 

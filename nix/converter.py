@@ -1,5 +1,3 @@
-from nix import utils
-
 metadata = ''
 
 
@@ -13,9 +11,8 @@ def add_context():
     add_content(context)
 
 
-# converts metadata for the selected experiment
-def convert_metadata(experiment_id, file_name):
-    nix_file = utils.open_nix_file(experiment_id, file_name)
+# converts metadata for the selected NIX file
+def convert_metadata(nix_file):
     global metadata
     metadata = ""
     add_context()
@@ -43,7 +40,7 @@ def parse_blocks(blocks):
             block = blocks[i]
             content += '\n    {\n    "name": "' + block.name + '"'
             if block.metadata is not None:
-                name = utils.edit_name(block.metadata.name)
+                name = edit_name(block.metadata.name)
                 content += ',\n    "metadataLinkTo": "' + name + '"'
             # parses groups
             if len(block.groups) > 0:
@@ -75,7 +72,7 @@ def parse_groups(groups):
         group = groups[i]
         content += '\n      {\n      "name": "' + group.name + '"'
         if group.metadata is not None:
-            name = utils.edit_name(group.metadata.name)
+            name = edit_name(group.metadata.name)
             content += ',\n      "metadataLinkTo": "' + name + '"'
         # data arrays links
         if len(group.data_arrays) > 0:
@@ -127,7 +124,7 @@ def parse_data_arrays(data_arrays):
         content += '\n      {\n      "name": "' + array.name + '",'
         content += '\n      "type": "' + array.type + '",'
         if array.metadata is not None:
-            name = utils.edit_name(array.metadata.name)
+            name = edit_name(array.metadata.name)
             content += '\n      "metadataLinkTo": "' + name + '",'
         # loop dimensions
         if len(array.dimensions) > 0:
@@ -159,7 +156,7 @@ def recursive_section_search(section, iteration, nix_file):
     content = ""
     gap = " " * iteration * 2
     if hasattr(section, 'name'):
-        name = utils.edit_name(section.name)
+        name = edit_name(section.name)
         content += gap + '"' + name + '": {'
         # parses props
         if hasattr(section, 'props') and section.props:
@@ -205,14 +202,14 @@ def parse_props(props, iteration, nix_file):
     content = ""
     gap = " " * iteration * 2
     for i in range(len(props)):
-        name = utils.edit_name(props[i].name)
+        name = edit_name(props[i].name)
         value = ""
         for j in range(len(props[i].values)):
             # checks property value length
             if len(str(props[i].values[j])) == 36:
                 section = find_section_by_id(nix_file.sections, props[i].values[j], None)
                 if section is not None and hasattr(section, 'name'):
-                    tmp_value = utils.edit_name(section.name)
+                    tmp_value = edit_name(section.name)
                 else:
                     tmp_value = str(props[i].values[j])
             else:
@@ -228,6 +225,19 @@ def parse_props(props, iteration, nix_file):
         if i < len(props) - 1:
             content += ','
     return content
+
+
+# returns the modified name
+def edit_name(text):
+    if len(text) > 0:
+        if text[1].islower():
+            text = text[0].lower() + text[1:]
+    for i in range(len(text)):
+        if (i > 0) and (i < len(text) - 1) and (text[i - 1] == " "):
+            text = text[:i - 1] + text[i].upper() + text[i + 1:]
+    text = text.replace(" ", "")
+    text = text.replace(".", "")
+    return text
 
 
 # adds content to the metadata structure

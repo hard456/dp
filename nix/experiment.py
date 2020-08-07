@@ -2,6 +2,7 @@ import random
 import os
 import nixio as nix
 from django.core.files.storage import FileSystemStorage
+from nix import converter
 
 fs = FileSystemStorage()
 file_extensions = ['.nix', '.h5']
@@ -21,6 +22,19 @@ def file_exists(experiment_id, file_name):
     if fs.exists('experiments/' + experiment_id + '/' + file_name):
         return True
     return False
+
+
+# converts metadata for the selected NIX file
+def convert_metadata(experiment_id, file):
+    new_name = file.split('.')[0] + '.jsonld'
+    if not file_exists(experiment_id, new_name):
+        try:
+            nix_file = open_nix_file(experiment_id, file)
+            content = converter.convert_metadata(nix_file)
+            create_json_ld_file(experiment_id, new_name, content)
+        except:
+            return False
+    return True
 
 
 # checks unique file names
@@ -120,16 +134,3 @@ def create_json_ld_file(experiment_id, file_name, content):
     file = open(os.path.join(directory, '../media/experiments/' + experiment_id + '/' + file_name), 'w+',
                 encoding="utf-8")
     file.write(content)
-
-
-# returns the modified name for writing in json-ld format
-def edit_name(text):
-    if len(text) > 0:
-        if text[1].islower():
-            text = text[0].lower() + text[1:]
-    for i in range(len(text)):
-        if (i > 0) and (i < len(text) - 1) and (text[i - 1] == " "):
-            text = text[:i - 1] + text[i].upper() + text[i + 1:]
-    text = text.replace(" ", "")
-    text = text.replace(".", "")
-    return text
