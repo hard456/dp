@@ -4,7 +4,6 @@ import nixio as nix
 from django.core.files.storage import FileSystemStorage
 from nix import converter
 
-fs = FileSystemStorage()
 file_extensions = ['.nix', '.h5']
 
 
@@ -19,6 +18,7 @@ def generate_experiment_id():
 
 # checks the existence of the file
 def file_exists(experiment_id, file_name):
+    fs = FileSystemStorage()
     if fs.exists('experiments/' + experiment_id + '/' + file_name):
         return True
     return False
@@ -77,12 +77,14 @@ def check_file_extensions(files):
 
 # saves experiment files
 def save_files(files, experiment_id):
+    fs = FileSystemStorage()
     for file in files:
         fs.save('experiments/' + experiment_id + '/' + file.name.lower(), file)
 
 
 # returns true if the experiment exists
 def experiment_exists(experiment_id):
+    fs = FileSystemStorage()
     if fs.exists('experiments/' + experiment_id + '/'):
         return True
     return False
@@ -90,6 +92,7 @@ def experiment_exists(experiment_id):
 
 # returns the NIX file names for the selected experiment
 def get_nix_files(experiment_id):
+    fs = FileSystemStorage()
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     nix_files = list()
     # loop files in directory
@@ -104,6 +107,7 @@ def get_nix_files(experiment_id):
 
 # returns the json-ld file names for the selected experiment
 def get_json_ld_files(experiment_id):
+    fs = FileSystemStorage()
     all_files = fs.listdir('experiments/' + experiment_id + '/')[1]
     json_ld_files = list()
     # loop files in directory
@@ -116,6 +120,7 @@ def get_json_ld_files(experiment_id):
 
 # returns the contents of the file
 def read_file(experiment_id, file_name):
+    fs = FileSystemStorage()
     file = fs.open('experiments/' + experiment_id + '/' + file_name)
     return file.read()
 
