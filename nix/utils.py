@@ -115,8 +115,10 @@ def open_nix_file(experiment_id, file_name):
 
 
 # creates a json-ld file and writes the contents to it
-def create_json_ld_file (experiment_id, file_name, content):
-    file = fs.open('experiments/' + experiment_id + '/' + file_name, 'w')
+def create_json_ld_file(experiment_id, file_name, content):
+    directory = os.path.dirname(__file__)  # get current directory
+    file = open(os.path.join(directory, '../media/experiments/' + experiment_id + '/' + file_name), 'w+',
+                encoding="utf-8")
     file.write(content)
 
 
@@ -126,8 +128,8 @@ def edit_name(text):
         if text[1].islower():
             text = text[0].lower() + text[1:]
     for i in range(len(text)):
-        if (i > 0) and (i < len(text)-1) and (text[i-1] == " "):
-            text = text[:i-1] + text[i].upper() + text[i+1:]
+        if (i > 0) and (i < len(text) - 1) and (text[i - 1] == " "):
+            text = text[:i - 1] + text[i].upper() + text[i + 1:]
     text = text.replace(" ", "")
     text = text.replace(".", "")
     return text
