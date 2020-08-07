@@ -95,6 +95,10 @@ def show_find_page(request, id):
 def upload_experiment(request):
     if request.FILES.getlist('upload_files', True):
         files = request.FILES.getlist('upload_files')
+        if len(files) == 0:
+            return render(request, 'nix/upload_experiment.html', {
+                'error_message': "No file selected."
+            })
         file = files[0]
         # checks unique file names
         if not experiment.check_unique_file_names(files):
