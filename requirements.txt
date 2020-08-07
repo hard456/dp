@@ -4,3 +4,4 @@ SPARQLWrapper==1.8.5
 requests==2.24.0
 rdflib==5.0.0
 rdflib-jsonld==0.5.0
+idna==2.10
