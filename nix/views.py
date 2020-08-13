@@ -26,6 +26,7 @@ def show_experiment_page(request, id):
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'transformed_files': experiment.get_json_ld_files(id),
+        'nix_transformed': experiment.get_nix_transformed_bool_list(id),
         'files': experiment.get_nix_files(id)
     })
 
@@ -56,6 +57,7 @@ def delete_file(request, id, name):
             'experiment_id': id,
             'error_message': "The file was not deleted.",
             'transformed_files': experiment.get_json_ld_files(id),
+            'nix_transformed': experiment.get_nix_transformed_bool_list(id),
             'files': experiment.get_nix_files(id)
         })
 
@@ -63,6 +65,7 @@ def delete_file(request, id, name):
         'experiment_id': id,
         'success_message': "The file was deleted.",
         'transformed_files': experiment.get_json_ld_files(id),
+        'nix_transformed': experiment.get_nix_transformed_bool_list(id),
         'files': experiment.get_nix_files(id)
     })
 
@@ -93,13 +96,8 @@ def show_find_page(request, id):
 
 # creates an experiment and uploads files
 def upload_experiment(request):
-    if request.FILES.getlist('upload_files', True):
+    if request.FILES.getlist('upload_files', False):
         files = request.FILES.getlist('upload_files')
-        if len(files) == 0:
-            return render(request, 'nix/upload_experiment.html', {
-                'error_message': "No file selected."
-            })
-        file = files[0]
         # checks unique file names
         if not experiment.check_unique_file_names(files):
             return render(request, 'nix/upload_experiment.html', {
@@ -239,6 +237,7 @@ def convert_all(request, id):
         'error_message': error_message,
         'success_message': success_message,
         'transformed_files': experiment.get_json_ld_files(id),
+        'nix_transformed': experiment.get_nix_transformed_bool_list(id),
         'files': experiment.get_nix_files(id)
     })
 
@@ -261,6 +260,7 @@ def convert_file(request, id, name):
         'error_message': error_message,
         'success_message': success_message,
         'transformed_files': experiment.get_json_ld_files(id),
+        'nix_transformed': experiment.get_nix_transformed_bool_list(id),
         'files': experiment.get_nix_files(id)
     })
 

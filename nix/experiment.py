@@ -118,6 +118,18 @@ def get_json_ld_files(experiment_id):
     return json_ld_files
 
 
+# returns a list of bool values ​​for the nix files of the experiment
+def get_nix_transformed_bool_list(experiment_id):
+    files = get_nix_files(experiment_id)
+    nix_bool_list = list()
+    for i in range(len(files)):
+        if file_exists(experiment_id, files[i].split('.')[0] + '.jsonld'):
+            nix_bool_list.append(True)
+        else:
+            nix_bool_list.append(False)
+    return nix_bool_list
+
+
 # returns the contents of the file
 def read_file(experiment_id, file_name):
     fs = FileSystemStorage()

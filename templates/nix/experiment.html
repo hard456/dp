@@ -1,5 +1,5 @@
 {% extends 'nix/default.html' %}
-
+{% load tags %}
 {% block content %}
 
     <!-- MODAL SPINNER -->
@@ -50,8 +50,14 @@
                                 <form method="post" action="{% url 'convert_file' id=experiment_id name=file %}"
                                       onsubmit="showModalWindow()">
                                     {% csrf_token %}
-                                    <input type="submit" onclick="return confirm('Do you want to convert this file?')"
-                                           class="btn-sm btn-success center" value="Convert"/>
+                                    {% if not nix_transformed|get_at_index:forloop.counter0 %}
+                                        <input type="submit"
+                                               onclick="return confirm('Do you want to convert this file?')"
+                                               class="btn-sm btn-success center" value="Convert"/>
+                                    {% else %}
+                                        <input type="button" class="btn-sm btn-secondary center" value="Converted"
+                                               disabled/>
+                                    {% endif %}
                                 </form>
                             </div>
                             <div class="col-12 col-md-1 mt-1">
@@ -122,7 +128,8 @@
                     <form id="uploadFilesForm" action="{% url 'upload_files' id=experiment_id %}" method="post"
                           enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input type="file" id="files" class="form-control-file bg-secondary text-white border" name="upload_files"
+                        <input type="file" id="files" class="form-control-file bg-secondary text-white border"
+                               name="upload_files"
                                accept=".nix,.h5" multiple>
                         <button type="button" id="uploadFilesButton" class="btn btn-primary float-right mt-2"
                                 onclick="submitUploadFiles()">Upload
