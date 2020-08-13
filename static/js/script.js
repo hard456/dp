@@ -49,5 +49,6 @@ function submitUploadFiles() {
 
 //displays the modal window
 function showModalWindow() {
+        $('#spinnerModal').modal({backdrop: 'static', keyboard: false})
         $('#spinnerModal').modal('show');
 }
