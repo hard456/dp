@@ -189,6 +189,7 @@ def upload_files(request, id):
                 'experiment_id': id,
                 'error_message': "The file can only have a .nix or .h5 extension.",
                 'transformed_files': experiment.get_json_ld_files(id),
+                'nix_transformed': experiment.get_nix_transformed_bool_list(id),
                 'files': experiment.get_nix_files(id)
             })
 
@@ -198,6 +199,7 @@ def upload_files(request, id):
                 'experiment_id': id,
                 'error_message': "Files do not contain unique names.",
                 'transformed_files': experiment.get_json_ld_files(id),
+                'nix_transformed': experiment.get_nix_transformed_bool_list(id),
                 'files': experiment.get_nix_files(id)
             })
 
@@ -206,12 +208,14 @@ def upload_files(request, id):
             'experiment_id': id,
             'success_message': "File upload successful.",
             'transformed_files': experiment.get_json_ld_files(id),
+            'nix_transformed': experiment.get_nix_transformed_bool_list(id),
             'files': experiment.get_nix_files(id)
         })
     return render(request, 'nix/experiment.html', {
         'experiment_id': id,
         'error_message': "No file selected.",
         'transformed_files': experiment.get_json_ld_files(id),
+        'nix_transformed': experiment.get_nix_transformed_bool_list(id),
         'files': experiment.get_nix_files(id)
     })
 
